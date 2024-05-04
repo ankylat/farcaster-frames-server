@@ -4,7 +4,7 @@ const express = require("express");
 const prisma = require("./lib/prismaClient");
 const bodyParser = require("body-parser");
 
-const framesRoutes = require("./routes/farcaster-frames");
+const farhackRoute = require("./routes/farhack");
 
 const app = express();
 app.use(cors());
@@ -12,7 +12,7 @@ app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 const port = 3000;
 
-app.use("/farcaster-frames", framesRoutes);
+app.use("/farhack", farhackRoute);
 
 // ********* ROUTES ***********
 
