@@ -14,8 +14,9 @@ datasource db {
 }
 
 model User {
-  fid       Int            @id   @unique      // Frontend identifier if needed
-  sessions  WritingSession[] // Relation to WritingSession
+  fid                Int            @id   @unique
+  isActive           Boolean?
+  repliesPerDay      Int?
 }
 
 model WritingSession {
