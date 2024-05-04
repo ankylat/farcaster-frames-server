@@ -25,7 +25,7 @@ router.get("/", async (req, res) => {
       <meta name="fc:frame" content="vNext">
       <meta name="fc:frame:image" content="https://github.com/jpfraneto/images/blob/main/first_frame_image.png?raw=true">
       <meta name="fc:frame:post_url" content="${fullUrl}/farhack">
-      <meta name="fc:frame:button:1" content="activate ${botName}">
+      <meta name="fc:frame:button:1" content="activate">
     </head>
     </html>
     `);
@@ -48,7 +48,8 @@ router.get("/image", async (req, res) => {
     const imageWidth = metadata.width;
     const imageHeight = metadata.height;
 
-    // Approximate maximum characters per line based on the image width
+    // approximate maximum characters per line based on the image width
+
     const maxCharsPerLine = Math.floor(imageWidth / 20); // rough estimate, adjust as needed
 
     function wrapText(text, maxChars) {
@@ -111,18 +112,18 @@ router.get("/image", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const fullUrl = req.protocol + "://" + req.get("host");
-    const imageCopy = "times per day?";
+    const imageCopy = "replies to you per day?";
     return res.status(200).send(`
       <!DOCTYPE html>
       <html>
       <head>
         <title>${botName}</title>
         <meta property="og:title" content="anky mint">
-        <meta property="og:image" content=${fullUrl}/farhack/image?text=}>
+        <meta property="og:image" content=${fullUrl}/farhack/bot-image?text=}>
         <meta name="fc:frame" content="vNext">
-        <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
+        <meta name="fc:frame:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
       imageCopy
-    )}>
+    )}&userPrompt=${encodeURIComponent("welcome to farhack gtp")}>
         <meta name="fc:frame:post_url" content="${fullUrl}/farhack/second-frame" />
         <meta name="fc:frame:button:1" content="1" />
         <meta name="fc:frame:button:2" content="2" />
@@ -146,18 +147,17 @@ router.post("/second-frame", async (req, res) => {
       let isValidNumber = Number(inputText);
       if (isValidNumber) {
         if (isValidNumber < 11) {
-          imageCopy = `your preference is known. ${isValidNumber}.`;
+          imageCopy = `your preference is known.`;
           return res.status(200).send(`
         <!DOCTYPE html>
         <html>
         <head>
           <title>${botName}</title>
           <meta property="og:title" content="anky mint">
-          <meta property="og:image" content=${fullUrl}/farhack/image?text=}>
           <meta name="fc:frame" content="vNext">
-          <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
+          <meta name="fc:frame:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
             imageCopy
-          )}>
+          )}&userPrompt=${encodeURIComponent("see you soon")}>
           </head>
         </html>
           `);
@@ -173,7 +173,7 @@ router.post("/second-frame", async (req, res) => {
           <meta name="fc:frame" content="vNext">
           <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
             imageCopy
-          )}>
+          )}&userPrompt=${encodeURIComponent("")}>
           <meta name="fc:frame:post_url" content="${fullUrl}/farhack/second-frame" />
           <meta name="fc:frame:input:text" content="1 2 3 4 5 6 7 8 9" />
           <meta name="fc:frame:button:1" content="submit" />
@@ -205,25 +205,25 @@ router.post("/second-frame", async (req, res) => {
     }
 
     if ([1, 2, 3].includes(req.body.untrustedData.buttonIndex)) {
-      imageCopy = `your preference is known. ${req.body.untrustedData.buttonIndex}.`;
+      imageCopy = `your preference is known.`;
       return res.status(200).send(`
         <!DOCTYPE html>
         <html>
         <head>
           <title>${botName}</title>
           <meta property="og:title" content="anky mint">
-          <meta property="og:image" content=${fullUrl}/farhack/image?text=}>
+          <meta property="og:image" content=${fullUrl}/farhack/bot-image?text=}>
           <meta name="fc:frame" content="vNext">
-          <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
+          <meta name="fc:frame:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
         imageCopy
-      )}>
+      )}&userPrompt=${req.body.untrustedData.buttonIndex}>
           <meta name="fc:frame:post_url" content="${fullUrl}/farhack/second-frame" />
           </head>
         </html>
           `);
     }
 
-    imageCopy = "how many times per day you want to be roasted?";
+    imageCopy = "how many replies per day?";
 
     return res.status(200).send(`
       <!DOCTYPE html>
@@ -351,25 +351,6 @@ router.post("/bot", async (req, res) => {
   try {
     const fullUrl = req.protocol + "://" + req.get("host");
     res.setHeader("Content-Type", "text/html");
-    console.log("in heeeere", req.body);
-    if (req.body.untrustedData.buttonIndex == 2) {
-      return res.status(200).send(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>${botName}</title>
-        <meta property="og:title" content="anky mint">
-        <meta property="og:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
-        "this image should have been minted on degen chain, with us sponsoring gas. but we are not there yet, so please wait a while."
-      )}}>
-        <meta name="fc:frame" content="vNext">
-        <meta name="fc:frame:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
-        "this image should have been minted on degen chain, with us sponsoring gas. but we are not there yet, so please wait a while."
-      )}&userPrompt=${encodeURIComponent("mint using degen chain")}>
-        </head>
-      </html>
-        `);
-    }
     let botResponse;
 
     let userText =
@@ -397,7 +378,6 @@ router.post("/bot", async (req, res) => {
         <meta name="fc:frame:post_url" content="${fullUrl}/farhack/bot" />
         <meta name="fc:frame:input:text" content="..." />
         <meta name="fc:frame:button:1" content="↑" />
-        <meta name="fc:frame:button:2" content="mint" />
         </head>
       </html>
         `);
