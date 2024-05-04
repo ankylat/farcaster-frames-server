@@ -1,7 +1,6 @@
 require("dotenv").config();
 const cors = require("cors");
 const express = require("express");
-const prisma = require("./lib/prismaClient");
 const bodyParser = require("body-parser");
 
 const farhackRoute = require("./routes/farhack");

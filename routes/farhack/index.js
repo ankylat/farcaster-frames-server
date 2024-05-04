@@ -3,7 +3,6 @@ const router = express.Router();
 const axios = require("axios");
 const fs = require("fs");
 const sharp = require("sharp");
-const prisma = require("../../lib/prismaClient");
 
 ///////////// MIDJOURNEY ON A FRAME  ////////////////////////
 
