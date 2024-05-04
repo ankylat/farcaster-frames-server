@@ -6,7 +6,7 @@ const sharp = require("sharp");
 
 ///////////// MIDJOURNEY ON A FRAME  ////////////////////////
 
-const botName = ``;
+const botName = `yiaju`;
 
 router.get("/", async (req, res) => {
   try {
@@ -210,6 +210,105 @@ router.post("/second-frame", async (req, res) => {
         `);
   } catch (error) {
     console.log("there was an error here", error);
+  }
+});
+
+///////////// MIDJOURNEY ON A FRAME  ////////////////////////
+
+///////////// MIDJOURNEY ON A FRAME  ////////////////////////
+
+///////////// MIDJOURNEY ON A FRAME  ////////////////////////
+
+router.get("/bot", async (req, res) => {
+  try {
+    const fullUrl = req.protocol + "://" + req.get("host");
+    let imageCopy = `rate the roasting from ${botName}`;
+    res.setHeader("Content-Type", "text/html");
+    return res.status(200).send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${botName}</title>
+        <meta property="og:title" content="anky mint">
+        <meta property="og:image" content=${fullUrl}/farhack/image?text=}>
+        <meta name="fc:frame" content="vNext">
+        <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
+      imageCopy
+    )}>
+        <meta name="fc:frame:post_url" content="${fullUrl}/farhack/bot" />
+        <meta name="fc:frame:button:1" content="⭐️" />
+        <meta name="fc:frame:button:2" content="⭐️⭐️" />
+        <meta name="fc:frame:button:3" content="⭐️⭐️⭐️" />
+        <meta name="fc:frame:button:4" content="⭐️⭐️⭐️⭐️" />
+        </head>
+      </html>
+        `);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error generating image");
+  }
+});
+
+router.post("/bot", async (req, res) => {
+  try {
+    const fullUrl = req.protocol + "://" + req.get("host");
+    res.setHeader("Content-Type", "text/html");
+    let imageCopy = `rate the roasting from ${botName}`;
+    return res.status(200).send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${botName}</title>
+        <meta property="og:title" content="anky mint">
+        <meta property="og:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
+      imageCopy
+    )}}>
+        <meta name="fc:frame" content="vNext">
+        <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
+      imageCopy
+    )}>
+        <meta name="fc:frame:post_url" content="${fullUrl}/farhack/bot/second-frame" />
+        <meta name="fc:frame:button:1" content="⭐️" />
+        <meta name="fc:frame:button:2" content="⭐️⭐️" />
+        <meta name="fc:frame:button:3" content="⭐️⭐️⭐️" />
+        <meta name="fc:frame:button:4" content="⭐️⭐️⭐️⭐️" />
+        </head>
+      </html>
+        `);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error generating image");
+  }
+});
+
+router.post("/bot/second-frame", async (req, res) => {
+  try {
+    const fullUrl = req.protocol + "://" + req.get("host");
+    res.setHeader("Content-Type", "text/html");
+    return res.status(200).send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${botName}</title>
+        <meta property="og:title" content="anky mint">
+        <meta property="og:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
+      imageCopy
+    )}}>
+        <meta name="fc:frame" content="vNext">
+        <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
+      imageCopy
+    )}>
+        <meta name="fc:frame:post_url" content="${fullUrl}/farhack/bot/second-frame" />
+        <meta name="fc:frame:button:1" content="⭐️" />
+        <meta name="fc:frame:button:2" content="⭐️⭐️" />
+        <meta name="fc:frame:button:3" content="⭐️⭐️⭐️" />
+        <meta name="fc:frame:button:4" content="⭐️⭐️⭐️⭐️" />
+        </head>
+      </html>
+        `);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error generating image");
   }
 });
 
