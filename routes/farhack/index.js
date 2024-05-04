@@ -35,7 +35,6 @@ router.get("/", async (req, res) => {
 
 router.get("/image", async (req, res) => {
   try {
-    console.log("req", req.query);
     const imageCopy = decodeURIComponent(req.query.text);
 
     const response = await axios({
@@ -53,7 +52,7 @@ router.get("/image", async (req, res) => {
           <style>
             .text { font: bold 48px sans-serif; fill: white; text-anchor: start; }
           </style>
-          <text x="16%" y="25%" class="text" dominant-baseline="hanging">${imageCopy}</text>
+          <text x="12%" y="25%" class="text" dominant-baseline="hanging">${imageCopy}</text>
         </svg>`;
 
     sharp(imageBuffer)
@@ -79,7 +78,6 @@ router.get("/image", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const fullUrl = req.protocol + "://" + req.get("host");
-    console.log("inside the post route", req.body);
     const imageCopy = "times per day?";
     return res.status(200).send(`
       <!DOCTYPE html>
@@ -109,20 +107,92 @@ router.post("/", async (req, res) => {
 router.post("/second-frame", async (req, res) => {
   try {
     let imageCopy;
-    console.log("this is the second frame route.", req.body);
     const fullUrl = req.protocol + "://" + req.get("host");
-
-    if (
-      [1, 2, 3].includes(req.body.untrustedData.buttonIndex) ||
-      req.body.untrustedData.inputText
-    ) {
-      // send this information to the bot so that it can know how often to reply
-      let isValidNumber = Number(req.body.untrustedData.inputText);
-      console.log("the is valid number is: ", isValidNumber);
-      if (!isValidNumber) {
-        console.log(req.body.untrustedData);
+    if (req.body.untrustedData.inputText) {
+      let inputText = req.body.untrustedData.inputText;
+      let isValidNumber = Number(inputText);
+      if (isValidNumber) {
+        if (isValidNumber < 11) {
+          imageCopy = `your preference is known. ${isValidNumber}.`;
+          return res.status(200).send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${botName}</title>
+          <meta property="og:title" content="anky mint">
+          <meta property="og:image" content=${fullUrl}/farhack/image?text=}>
+          <meta name="fc:frame" content="vNext">
+          <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
+            imageCopy
+          )}>
+          </head>
+        </html>
+          `);
+        } else {
+          imageCopy = req.body.untrustedData.inputText;
+          return res.status(200).send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${botName}</title>
+          <meta property="og:title" content="anky mint">
+          <meta property="og:image" content=${fullUrl}/farhack/image?text=}>
+          <meta name="fc:frame" content="vNext">
+          <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
+            imageCopy
+          )}>
+          <meta name="fc:frame:post_url" content="${fullUrl}/farhack/second-frame" />
+          <meta name="fc:frame:input:text" content="1 2 3 4 5 6 7 8 9" />
+          <meta name="fc:frame:button:1" content="submit" />
+          </head>
+        </html>
+          `);
+        }
+      } else {
+        // this is the place
         imageCopy = req.body.untrustedData.inputText;
         return res.status(200).send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${botName}</title>
+          <meta property="og:title" content="anky mint">
+          <meta property="og:image" content=${fullUrl}/farhack/image?text=}>
+          <meta name="fc:frame" content="vNext">
+          <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
+          imageCopy
+        )}>
+          <meta name="fc:frame:post_url" content="${fullUrl}/farhack/second-frame" />
+          <meta name="fc:frame:input:text" content="1 2 3 4 5 6 7 8 9" />
+          <meta name="fc:frame:button:1" content="submit" />
+          </head>
+        </html>
+          `);
+      }
+    }
+
+    if ([1, 2, 3].includes(req.body.untrustedData.buttonIndex)) {
+      imageCopy = `your preference is known. ${req.body.untrustedData.buttonIndex}.`;
+      return res.status(200).send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${botName}</title>
+          <meta property="og:title" content="anky mint">
+          <meta property="og:image" content=${fullUrl}/farhack/image?text=}>
+          <meta name="fc:frame" content="vNext">
+          <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
+        imageCopy
+      )}>
+          <meta name="fc:frame:post_url" content="${fullUrl}/farhack/second-frame" />
+          </head>
+        </html>
+          `);
+    }
+
+    imageCopy = "how many times per day you want to be roasted?";
+
+    return res.status(200).send(`
       <!DOCTYPE html>
       <html>
       <head>
@@ -131,51 +201,14 @@ router.post("/second-frame", async (req, res) => {
         <meta property="og:image" content=${fullUrl}/farhack/image?text=}>
         <meta name="fc:frame" content="vNext">
         <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
-          imageCopy
-        )}>
+      imageCopy
+    )}>
         <meta name="fc:frame:post_url" content="${fullUrl}/farhack/second-frame" />
         <meta name="fc:frame:input:text" content="1 2 3 4 5 6 7 8 9" />
         <meta name="fc:frame:button:1" content="submit" />
         </head>
       </html>
         `);
-      }
-      const repliesPerDay = req.body.untrustedData.textInput;
-      imageCopy = "your preference is known.";
-      return res.status(200).send(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>${botName}</title>
-        <meta property="og:title" content="anky mint">
-        <meta property="og:image" content=${fullUrl}/farhack/image?text=}>
-        <meta name="fc:frame" content="vNext">
-        <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
-        imageCopy
-      )}>
-        </head>
-      </html>
-        `);
-    } else {
-      imageCopy = "enter a number smaller than 10";
-      return res.status(200).send(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>${botName}</title>
-        <meta property="og:title" content="anky mint">
-        <meta property="og:image" content=${fullUrl}/farhack/image?text=}>
-        <meta name="fc:frame" content="vNext">
-        <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
-        imageCopy
-      )}>
-        <meta name="fc:frame:post_url" content="${fullUrl}/farhack/second-frame" />
-        <meta name="fc:frame:input:text" content="send" />
-        <meta name="fc:frame:button:1" content="submit" />
-        </head>
-      </html>
-        `);
-    }
   } catch (error) {
     console.log("there was an error here", error);
   }
