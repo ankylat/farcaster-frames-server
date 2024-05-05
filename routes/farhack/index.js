@@ -44,7 +44,6 @@ router.get("/", async (req, res) => {
 router.get("/image", async (req, res) => {
   try {
     const imageCopy = decodeURIComponent(req.query.text);
-    console.log("the image copy is: ", req.query.text, imageCopy);
     const userPrompt = decodeURIComponent(req.query.userPrompt) || "";
     const imageWidth = 800;
     const imageHeight = 600;
@@ -79,8 +78,9 @@ router.get("/image", async (req, res) => {
       .join("");
 
     const svgContent = `<svg width="${imageWidth}" height="${imageHeight}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${imageWidth} ${imageHeight}">
+
       <rect width="100%" height="100%" fill="black"></rect>
-      <text x="4%" y="28%" fill="green" font-family="sans-serif" font-size="32" font-weight="bold">${userPrompt}</text>
+      <text x="10%" y="28%" fill="green" font-family="sans-serif" font-size="32" font-weight="bold">${userPrompt}</text>
       ${svgResponseText}
     </svg>`;
 
@@ -254,12 +254,19 @@ router.post("/second-frame", async (req, res) => {
           req.body.untrustedData.fid
         );
       } else if (Number(req.body.untrustedData.buttonIndex) == 2) {
+        console.log(
+          `a reply is going to sent now and be scheduled for the future`
+        );
         await replyToThisUserRightNow(req.body.untrustedData.fid);
         setTimeout(() => {
           replyToThisUserRightNow(req.body.untrustedData.fid);
         }, (millisecondsPerHours * 6) / 10);
       } else if (Number(req.body.untrustedData.buttonIndex) == 3) {
         await replyToThisUserRightNow(req.body.untrustedData.fid);
+        console.log(
+          `a reply is going to sent now and be scheduled for the future two times`
+        );
+
         setTimeout(() => {
           replyToThisUserRightNow(req.body.untrustedData.fid);
         }, millisecondsPerHours * 2);
@@ -735,6 +742,7 @@ async function queryUserDataFromNeynar(fid) {
 async function findCastAndGetTextToReplyToUser(fid, randomCast) {
   try {
     const user = await prisma.user.findUnique({ where: { fid: fid } });
+
     const messages = [
       {
         role: "system",
@@ -748,11 +756,12 @@ async function findCastAndGetTextToReplyToUser(fid, randomCast) {
       messages: messages,
     });
 
-    const dataResponse = completion.choices[0].message.content;
-    return dataResponse;
-    // request al LLM : casts - bio - random selected cast
-    // respuesta a ese cast en particular, un string de texto
-  } catch (error) {}
+    const replyToTheUser = completion.choices[0].message.content;
+    return replyToTheUser;
+  } catch (error) {
+    console.log("there was an error talking to the bot");
+    return "";
+  }
 }
 
 async function talkToBot(userText) {
@@ -770,8 +779,8 @@ async function talkToBot(userText) {
       messages: messages,
     });
 
-    const dataResponse = completion.choices[0].message.content;
-    return dataResponse;
+    const replyFromTheBot = completion.choices[0].message.content;
+    return replyFromTheBot;
   } catch (error) {
     console.log("there was an error talking to the bot");
     return "";
