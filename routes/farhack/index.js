@@ -354,7 +354,7 @@ router.post("/third-frame", async (req, res) => {
           <meta name="fc:frame:button:1" content="now" />
           <meta name="fc:frame:button:2" content="2" />
           <meta name="fc:frame:button:3" content="3" />
-          <meta name="fc:frame:button:3" content="none" />
+          <meta name="fc:frame:button:4" content="none" />
           </head>
         </html>
           `);
