@@ -318,9 +318,13 @@ router.post("/third-frame", async (req, res) => {
   try {
     let imageCopy;
     const fullUrl = req.protocol + "://" + req.get("host");
+    console.log("inside the frame server", req.body);
     if (req.body.untrustedData.buttonIndex == 1) {
+      console.log("HERE");
       let gameOver = "game over";
       imageCopy = "you wont get more replies from me";
+      console.log("right before this");
+
       return res.status(200).send(`
       <!DOCTYPE html>
       <html>
@@ -331,8 +335,9 @@ router.post("/third-frame", async (req, res) => {
         <meta name="fc:frame" content="vNext">
         <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
         imageCopy
-      )}&userPrompt=${encodeURIComponent(gameOver)}>
-        <meta name="fc:frame:post_url" content="${fullUrl}/farhack/third-frame" />
+      )}&userPrompt=${gameOver}>
+        <meta name="fc:frame:post_url" content="${fullUrl}/farhack" />
+        <meta name="fc:frame:button:1" content="i changed my mind" />
         </head>
       </html>
         `);
@@ -359,7 +364,9 @@ router.post("/third-frame", async (req, res) => {
         </html>
           `);
     }
-  } catch (error) {}
+  } catch (error) {
+    console.log("there was an error", error);
+  }
 });
 
 ///////////// BOT ON A FRAME  ////////////////////////
