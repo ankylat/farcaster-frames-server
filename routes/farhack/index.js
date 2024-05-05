@@ -498,7 +498,7 @@ function delay(ms) {
 async function getUserGroup() {
   try {
     console.log("inside the get user group function");
-    for (let i = 0; i < 20000; i++) {
+    for (let i = 1; i < 20000; i++) {
       await queryUserDataFromNeynar(i);
       await delay(300); // Wait for 300 ms before the next iteration
     }
@@ -508,34 +508,52 @@ async function getUserGroup() {
   }
 }
 
+getUserGroup();
+
 async function queryUserDataFromNeynar(fid) {
+  fid = parseInt(fid, 10); // Ensure fid is an integer
+  if (isNaN(fid)) {
+    console.error("Invalid fid provided:", fid);
+    return { success: false };
+  }
+
   const allUserCastsText = [];
   const allUserFollowingBios = [];
   try {
     const allCastsFromUserNeynarResponse = await getAllUserCasts(fid);
     const allFollowsOfUserNeynarResponse = await getAllUserFollowWithBios(fid);
+
     for (let cast of allCastsFromUserNeynarResponse) {
-      allUserCastsText.push(cast.text);
+      if (cast.text) allUserCastsText.push(cast.text);
     }
     for (let userFollow of allFollowsOfUserNeynarResponse) {
-      allUserFollowingBios.push(userFollow.user.profile.bio.text);
+      if (userFollow.user.profile.bio.text)
+        allUserFollowingBios.push(userFollow.user.profile.bio.text);
     }
-    await prisma.user.update({
+
+    await prisma.user.upsert({
       where: { fid: fid },
-      data: {
+      update: {
+        fetchedUserData: true,
+        casts: allUserCastsText.length
+          ? allUserCastsText
+          : ["No casts available."],
+        followingBios: allUserFollowingBios.length
+          ? allUserFollowingBios
+          : ["No bios available."],
+      },
+      create: {
+        fid: fid,
         fetchedUserData: true,
         casts: allUserCastsText,
         followingBios: allUserFollowingBios,
       },
     });
-    return {
-      success: true,
-    };
+
+    return { success: true };
   } catch (error) {
-    console.log("there was an error retrieving this information", error);
-    return {
-      success: false,
-    };
+    console.error("Error in queryUserDataFromNeynar", error);
+    return { success: false };
   }
 }
 
