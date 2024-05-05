@@ -244,6 +244,31 @@ router.post("/second-frame", async (req, res) => {
 
     if ([1, 2, 3].includes(req.body.untrustedData.buttonIndex)) {
       imageCopy = `your preference is known.`;
+      if (Number(req.body.untrustedData.buttonIndex) == 1) {
+        console.log("replying to this user right now");
+        const responseFromReplying = await replyToThisUserRightNow(
+          req.body.untrustedData.fid
+        );
+        if (responseFromReplying) {
+          let thisHeader = `your wishes are my commands.`;
+          imageCopy = `check your notifications`;
+          return res.status(200).send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${botName}</title>
+          <meta property="og:title" content="anky mint">
+          <meta property="og:image" content=${fullUrl}/farhack/bot-image?text=}>
+          <meta name="fc:frame" content="vNext">
+          <meta name="fc:frame:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
+            imageCopy
+          )}&userPrompt=${encodeURIComponent(thisHeader)}>
+          <meta name="fc:frame:post_url" content="${fullUrl}/farhack/second-frame" />
+          </head>
+        </html>
+          `);
+        }
+      }
       return res.status(200).send(`
         <!DOCTYPE html>
         <html>
@@ -284,6 +309,14 @@ router.post("/second-frame", async (req, res) => {
     console.log("there was an error here", error);
   }
 });
+
+///////////// BOT ON A FRAME  ////////////////////////
+
+///////////// BOT ON A FRAME  ////////////////////////
+
+///////////// BOT ON A FRAME  ////////////////////////
+
+///////////// BOT ON A FRAME  ////////////////////////
 
 ///////////// BOT ON A FRAME  ////////////////////////
 
@@ -495,20 +528,87 @@ function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function getUserGroup() {
+// async function getUserGroup() {
+//   try {
+//     console.log("inside the get user group function");
+//     for (let i = 1; i < 20000; i++) {
+//       await queryUserDataFromNeynar(i);
+//       await delay(300); // Wait for 300 ms before the next iteration
+//     }
+//     console.log("FINISHED");
+//   } catch (error) {
+//     console.log("EEEEERRROR", error);
+//   }
+// }
+
+// getUserGroup();
+
+async function replyToThisUserRightNow(fid) {
   try {
-    console.log("inside the get user group function");
-    for (let i = 1; i < 20000; i++) {
-      await queryUserDataFromNeynar(i);
-      await delay(300); // Wait for 300 ms before the next iteration
+    // find random cast from this user on the last 24 hours, or 48, or 72
+    const randomCastFromThisUser = await getRandomCastFromUser(fid);
+
+    let castOptions = {
+      text: "weeeena bruno ctm",
+      embeds: [],
+      parent: randomCastFromThisUser.hash,
+      signer_uuid: process.env.NEYNAR_ANKY_SIGNER,
+    };
+    console.log("the cast options are: ", castOptions);
+
+    try {
+      const response = await axios.post(
+        "https://api.neynar.com/v2/farcaster/cast",
+        castOptions,
+        {
+          headers: {
+            api_key: process.env.NEYNAR_API_KEY,
+          },
+        }
+      );
+      console.log("THE RESPONSE AFTER SENDING THE API CALL IS: ", response);
+      // ADD HERE THIS
+      return;
+      const prismaResponse = await prisma.castWrapper.create({
+        data: {
+          time: time,
+          cid: cid,
+          manaEarned: manaEarned,
+          castHash: response.data.cast.hash,
+          castAuthor: response.data.cast.author.username,
+        },
+      });
+
+      res.json({ cast: response.data.cast });
+    } catch (error) {
+      console.error(error);
+      return { success: false };
     }
-    console.log("FINISHED");
+    return { success: true };
   } catch (error) {
-    console.log("EEEEERRROR", error);
+    console.log("there was an error here", error);
+    return { success: false };
   }
 }
 
-getUserGroup();
+async function getRandomCastFromUser(fid) {
+  try {
+    const response = await axios.get(
+      `https://api.neynar.com/v2/farcaster/feed?feed_type=filter&filter_type=fids&fids=${fid}&limit=88`,
+      {
+        headers: {
+          api_key: process.env.NEYNAR_API_KEY,
+        },
+      }
+    );
+    const lastTenCasts = response.data.casts;
+    const randomCast =
+      lastTenCasts[Math.floor(lastTenCasts.length * Math.random())];
+    return randomCast;
+  } catch (error) {}
+}
+
+getRandomCastFromUser(16098);
 
 async function queryUserDataFromNeynar(fid) {
   fid = parseInt(fid, 10); // Ensure fid is an integer

@@ -13,6 +13,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@farcaster/core": "^0.14.11",
+    "@noble/ed25519": "^2.1.0",
     "@prisma/client": "^5.13.0",
     "axios": "^1.6.8",
     "cors": "^2.8.5",
