@@ -570,29 +570,6 @@ async function updateUserWithReplyFrequency(fid, replyFrequency) {
   }
 }
 
-async function getBotInitialReply(userFid) {
-  const userSpecificInformation = await getUserSpecificInformation(userFid);
-  try {
-    const messages = [
-      {
-        role: "system",
-        content: `Say something funny to the user, but on a sarcastic language. your mission is to make the user smile. Less than 280 characters.`,
-      },
-      { role: "user", content: "" },
-    ];
-
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo-0125",
-      messages: messages,
-    });
-
-    const dataResponse = completion.choices[0].message.content;
-    return dataResponse;
-  } catch (error) {
-    return "hello world";
-  }
-}
-
 async function getUserSpecificInformation(fid) {
   try {
     const user = await prisma.user.findUnique({
@@ -728,25 +705,65 @@ async function queryUserDataFromNeynar(fid) {
   }
 }
 
+// Assuming your local LLM server is running on http://localhost:8000 and has an endpoint /v1/completions
+const LLM_SERVER_URL = "http://localhost:8000/v1/completions";
+
+function createChatTemplate(systemPrompt, userQuery) {
+  const chatTemplate = `<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n${systemPrompt}<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n${userQuery}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n`;
+  return chatTemplate;
+}
+
+async function getCompletionFromLocalLLM(systemPrompt, text) {
+  try {
+    // Send a POST request to your local LLM server
+    const response = await axios.post(
+      LLM_SERVER_URL,
+      {
+        model: "meta-llama/Meta-Llama-3-8B-Instruct",
+        prompt: createChatTemplate(systemPrompt, text),
+        max_tokens: 70,
+        temperature: 0.1,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // Extract the completion from the response
+    const completion = response.data.choices[0].text;
+    return completion;
+  } catch (error) {
+    console.error("Error:", error);
+    return "Failed to get completion from local LLM.";
+  }
+}
+
+///////////^***************************************/
+
+async function getBotInitialReply(userFid) {
+  const userSpecificInformation = await getUserSpecificInformation(userFid);
+  try {
+    const systemPrompt = `Say something funny to the user, but on a sarcastic language. your mission is to make the user smile. Less than 280 characters.`;
+
+    const dataResponse = await getCompletionFromLocalLLM(systemPrompt, "");
+    return dataResponse;
+  } catch (error) {
+    return "hello world";
+  }
+}
+
 async function findCastAndGetTextToReplyToUser(fid, randomCast) {
   try {
     const user = await prisma.user.findUnique({ where: { fid: fid } });
+    const systemPrompt = `Your mission is to tease the user. Please reply to this message with less than 300 characters, teasing the person that will read. Less than 280 characters. This text will be replied to the following cast:`;
+    const dataResponse = await getCompletionFromLocalLLM(
+      systemPrompt,
+      randomCast.text
+    );
 
-    const messages = [
-      {
-        role: "system",
-        content: `Your mission is to tease the user. Please reply to this message with less than 300 characters, teasing the person that will read. Less than 280 characters. This text will be replied to the following cast:`,
-      },
-      { role: "user", content: randomCast.text },
-    ];
-
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo-0125",
-      messages: messages,
-    });
-
-    const replyToTheUser = completion.choices[0].message.content;
-    return replyToTheUser;
+    return dataResponse;
   } catch (error) {
     console.log("there was an error talking to the bot");
     return "";
@@ -755,23 +772,12 @@ async function findCastAndGetTextToReplyToUser(fid, randomCast) {
 
 async function talkToBot(userText) {
   try {
-    const response = await axios.post("http://localhost:8000", { userText });
-
-    // const messages = [
-    //   {
-    //     role: "system",
-    //     content: `You are a fun member of a social media network called Farcaster. You are interacting with the user through a farcaster frame, and your mission is to reply to what the user just said teasing her.`,
-    //   },
-    //   { role: "user", content: userText },
-    // ];
-
-    // const completion = await openai.chat.completions.create({
-    //   model: "gpt-3.5-turbo-0125",
-    //   messages: messages,
-    // });
-
-    // const replyFromTheBot = completion.choices[0].message.content;
-    return response;
+    const systemPrompt = `reply something funny to the motherfucking user`;
+    const dataResponse = await getCompletionFromLocalLLM(
+      systemPrompt,
+      userText
+    );
+    return dataResponse;
   } catch (error) {
     console.log("there was an error talking to the bot");
     return "";
