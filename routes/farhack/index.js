@@ -519,10 +519,7 @@ router.post("/bot", async (req, res) => {
         `);
     }
 
-    let userText =
-      stepOfImage == "2"
-        ? "⭐️".repeat(req.body.untrustedData.buttonIndex)
-        : req.body.untrustedData.inputText;
+    let userText = stepOfImage == "2" ? "" : req.body.untrustedData.inputText;
     if (req.body.untrustedData.inputText) {
       botResponse = await talkToBot(userText);
     } else {
