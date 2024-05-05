@@ -180,12 +180,12 @@ router.post("/second-frame", async (req, res) => {
           if (isValidNumber == 1) {
             createInstantaneousCastForThisUser(fid);
           }
+          console.log("IN HERE");
           if (response.success) {
             imageCopy = `your preference is known. check your notifications.`;
           } else {
             imageCopy = `there was an error. please try again`;
           }
-
           return res.status(200).send(`
         <!DOCTYPE html>
         <html>
@@ -243,13 +243,11 @@ router.post("/second-frame", async (req, res) => {
     }
 
     if ([1, 2, 3].includes(req.body.untrustedData.buttonIndex)) {
-      imageCopy = `your preference is known.`;
       if (Number(req.body.untrustedData.buttonIndex) == 1) {
-        console.log("replying to this user right now");
         const responseFromReplying = await replyToThisUserRightNow(
           req.body.untrustedData.fid
         );
-        if (responseFromReplying) {
+        if (responseFromReplying.success) {
           let thisHeader = `your wishes are my commands.`;
           imageCopy = `check your notifications`;
           return res.status(200).send(`
@@ -268,22 +266,24 @@ router.post("/second-frame", async (req, res) => {
         </html>
           `);
         }
+      } else {
+        imageCopy = "you will be surprised";
+        return res.status(200).send(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>${botName}</title>
+            <meta property="og:title" content="anky mint">
+            <meta property="og:image" content=${fullUrl}/farhack/bot-image?text=}>
+            <meta name="fc:frame" content="vNext">
+            <meta name="fc:frame:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
+          imageCopy
+        )}&userPrompt=${req.body.untrustedData.buttonIndex}>
+            <meta name="fc:frame:post_url" content="${fullUrl}/farhack/second-frame" />
+            </head>
+          </html>
+            `);
       }
-      return res.status(200).send(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>${botName}</title>
-          <meta property="og:title" content="anky mint">
-          <meta property="og:image" content=${fullUrl}/farhack/bot-image?text=}>
-          <meta name="fc:frame" content="vNext">
-          <meta name="fc:frame:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
-        imageCopy
-      )}&userPrompt=${req.body.untrustedData.buttonIndex}>
-          <meta name="fc:frame:post_url" content="${fullUrl}/farhack/second-frame" />
-          </head>
-        </html>
-          `);
     }
 
     imageCopy = "how many replies per day?";
@@ -462,6 +462,9 @@ async function createInstantaneousCastForThisUser(fid) {
       where: { fid: fid },
     });
     if (response) {
+      const repliedToUser = await replyToThisUserRightNow(fid);
+      console.log("the replied to user is: ", repliedToUser);
+      // UPDATE THIS USER WITH A NEW REPLY IN THE ARRAY OF THE LAST 3 REPLIES. WE NEED TO CHECK IF THE AMOUNT OF REPLIES THAT THE USER HAS GOTTEN ON THE LAST DAY CORRESPONDS TO THIS NUMBER AND IF NOT SEGREGATE THEM INTO THE FUTURE WITH A CRON JOB THAT STAYS RUNNING
     } else {
       throw new Error(
         "there was an error creating the instantaneous cast for this user"
@@ -547,14 +550,17 @@ async function replyToThisUserRightNow(fid) {
   try {
     // find random cast from this user on the last 24 hours, or 48, or 72
     const randomCastFromThisUser = await getRandomCastFromUser(fid);
+    const textForReplying = await findCastAndGetTextToReplyToUser(
+      fid,
+      randomCastFromThisUser
+    );
 
     let castOptions = {
-      text: "weeeena bruno ctm",
-      embeds: [],
+      text: textForReplying,
+      embeds: [`https://e342-172-90-234-126.ngrok-free.app/farhack/bot`],
       parent: randomCastFromThisUser.hash,
       signer_uuid: process.env.NEYNAR_ANKY_SIGNER,
     };
-    console.log("the cast options are: ", castOptions);
 
     try {
       const response = await axios.post(
@@ -566,20 +572,7 @@ async function replyToThisUserRightNow(fid) {
           },
         }
       );
-      console.log("THE RESPONSE AFTER SENDING THE API CALL IS: ", response);
-      // ADD HERE THIS
-      return;
-      const prismaResponse = await prisma.castWrapper.create({
-        data: {
-          time: time,
-          cid: cid,
-          manaEarned: manaEarned,
-          castHash: response.data.cast.hash,
-          castAuthor: response.data.cast.author.username,
-        },
-      });
-
-      res.json({ cast: response.data.cast });
+      return { success: true };
     } catch (error) {
       console.error(error);
       return { success: false };
@@ -607,8 +600,6 @@ async function getRandomCastFromUser(fid) {
     return randomCast;
   } catch (error) {}
 }
-
-getRandomCastFromUser(16098);
 
 async function queryUserDataFromNeynar(fid) {
   fid = parseInt(fid, 10); // Ensure fid is an integer
@@ -657,8 +648,24 @@ async function queryUserDataFromNeynar(fid) {
   }
 }
 
-async function findCastAndReplyToUser(fid, timestampForCast) {
+async function findCastAndGetTextToReplyToUser(fid, randomCast) {
   try {
+    const user = await prisma.user.findUnique({ where: { fid: fid } });
+    const messages = [
+      {
+        role: "system",
+        content: `Your mission is to tease the user. Please reply to this message with less than 300 characters, teasing the person that will read. This text will be replied to the following cast:`,
+      },
+      { role: "user", content: randomCast.text },
+    ];
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo-0125",
+      messages: messages,
+    });
+
+    const dataResponse = completion.choices[0].message.content;
+    return dataResponse;
     // request al LLM : casts - bio - random selected cast
     // respuesta a ese cast en particular, un string de texto
   } catch (error) {}
