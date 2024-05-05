@@ -305,7 +305,7 @@ router.post("/second-frame", async (req, res) => {
     )}&userPrompt=${encodeURIComponent(lastMessage)}>
         <meta name="fc:frame:post_url" content="${fullUrl}/farhack/third-frame" />
         <meta name="fc:frame:button:1" content="give up" />
-        <meta name="fc:frame:button:2" content="back" />
+        <meta name="fc:frame:button:2" content="maybe not" />
         </head>
       </html>
         `);
