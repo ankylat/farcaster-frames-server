@@ -141,6 +141,7 @@ router.post("/", async (req, res) => {
         <meta name="fc:frame:button:1" content="now" />
         <meta name="fc:frame:button:2" content="2" />
         <meta name="fc:frame:button:3" content="3" />
+        <meta name="fc:frame:button:4" content="none" />
         </head>
       </html>
         `);
@@ -162,7 +163,7 @@ router.post("/", async (req, res) => {
         <meta name="fc:frame:button:1" content="now" />
         <meta name="fc:frame:button:2" content="2" />
         <meta name="fc:frame:button:3" content="3" />
-        <meta name="fc:frame:button:4" content="custom" />
+        <meta name="fc:frame:button:4" content="none" />
         </head>
       </html>
         `);
@@ -289,8 +290,8 @@ router.post("/second-frame", async (req, res) => {
       }
     }
 
-    imageCopy = "how many replies per day?";
-
+    imageCopy = "are you sure?";
+    let lastMessage = "you are missing a lot of fun";
     return res.status(200).send(`
       <!DOCTYPE html>
       <html>
@@ -301,16 +302,64 @@ router.post("/second-frame", async (req, res) => {
         <meta name="fc:frame" content="vNext">
         <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
       imageCopy
-    )}>
-        <meta name="fc:frame:post_url" content="${fullUrl}/farhack/second-frame" />
-        <meta name="fc:frame:input:text" content="1 2 3 4 5 6 7 8 9" />
-        <meta name="fc:frame:button:1" content="submit" />
+    )}&userPrompt=${encodeURIComponent(lastMessage)}>
+        <meta name="fc:frame:post_url" content="${fullUrl}/farhack/third-frame" />
+        <meta name="fc:frame:button:1" content="give up" />
+        <meta name="fc:frame:button:2" content="back" />
         </head>
       </html>
         `);
   } catch (error) {
     console.log("there was an error here", error);
   }
+});
+
+router.post("/third-frame", async (req, res) => {
+  try {
+    let imageCopy;
+    const fullUrl = req.protocol + "://" + req.get("host");
+    if (req.body.untrustedData.buttonIndex == 1) {
+      let gameOver = "game over";
+      imageCopy = "you wont get more replies from me";
+      return res.status(200).send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${botName}</title>
+        <meta property="og:title" content="anky mint">
+        <meta property="og:image" content=${fullUrl}/farhack/image?text=}>
+        <meta name="fc:frame" content="vNext">
+        <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
+        imageCopy
+      )}&userPrompt=${encodeURIComponent(gameOver)}>
+        <meta name="fc:frame:post_url" content="${fullUrl}/farhack/third-frame" />
+        </head>
+      </html>
+        `);
+    } else {
+      imageCopy = "how many replies do you want to receive daily?";
+      console.log("IN HEREEEE");
+      return res.status(200).send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${botName}</title>
+          <meta property="og:title" content="farhack gtp">
+          <meta property="og:image" content=${fullUrl}/farhack/image?text=}>
+          <meta name="fc:frame" content="vNext">
+          <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
+        imageCopy
+      )}&userPrompt=${encodeURIComponent("welcome to farhack gtp")}>
+          <meta name="fc:frame:post_url" content="${fullUrl}/farhack/second-frame" />
+          <meta name="fc:frame:button:1" content="now" />
+          <meta name="fc:frame:button:2" content="2" />
+          <meta name="fc:frame:button:3" content="3" />
+          <meta name="fc:frame:button:3" content="none" />
+          </head>
+        </html>
+          `);
+    }
+  } catch (error) {}
 });
 
 ///////////// BOT ON A FRAME  ////////////////////////
