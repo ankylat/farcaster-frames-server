@@ -181,7 +181,7 @@ router.post("/second-frame", async (req, res) => {
             createInstantaneousCastForThisUser(fid);
           }
           if (response.success) {
-            imageCopy = `your preference is known.`;
+            imageCopy = `your preference is known. check your notifications.`;
           } else {
             imageCopy = `there was an error. please try again`;
           }
