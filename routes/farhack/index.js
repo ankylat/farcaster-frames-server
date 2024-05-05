@@ -116,28 +116,27 @@ router.get("/image", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-  const user = await prisma.user.upsert({
-    where: {
-      fid: req.body.untrustedData.fid,
-    },
-    create: {
-      fid: req.body.untrustedData.fid,
-    },
-    update: {},
-  });
-  console.log("the user is: ", user);
-  if (!user.fetchedUserData) {
-    const responseFromQueryingData = await queryUserDataFromNeynar(
-      req.body.untrustedData.fid
-    );
-    if (!responseFromQueryingData.success) {
-      setTimeout(async () => {
-        await queryUserDataFromNeynar(req.body.untrustedData.fid);
-      }, 5000);
-    }
-  }
-
   try {
+    const user = await prisma.user.upsert({
+      where: {
+        fid: req.body.untrustedData.fid,
+      },
+      create: {
+        fid: req.body.untrustedData.fid,
+      },
+      update: {},
+    });
+    console.log("the user is: ", user);
+    if (!user.fetchedUserData) {
+      const responseFromQueryingData = await queryUserDataFromNeynar(
+        req.body.untrustedData.fid
+      );
+      if (!responseFromQueryingData.success) {
+        setTimeout(async () => {
+          await queryUserDataFromNeynar(req.body.untrustedData.fid);
+        }, 5000);
+      }
+    }
     const fullUrl = req.protocol + "://" + req.get("host");
     const imageCopy = "how many replies do you want to receive daily?";
     return res.status(200).send(`
@@ -161,7 +160,26 @@ router.post("/", async (req, res) => {
         `);
   } catch (error) {
     console.error(error);
-    res.status(500).send("Error generating image");
+    imageCopy = "there was an error";
+    return res.status(200).send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${botName}</title>
+        <meta property="og:title" content="farhack gtp">
+        <meta property="og:image" content=${fullUrl}/farhack/bot-image?text=}>
+        <meta name="fc:frame" content="vNext">
+        <meta name="fc:frame:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
+      imageCopy
+    )}&userPrompt=${encodeURIComponent("welcome to farhack gtp")}>
+        <meta name="fc:frame:post_url" content="${fullUrl}/farhack/second-frame" />
+        <meta name="fc:frame:button:1" content="now" />
+        <meta name="fc:frame:button:2" content="2" />
+        <meta name="fc:frame:button:3" content="3" />
+        <meta name="fc:frame:button:4" content="custom" />
+        </head>
+      </html>
+        `);
   }
 });
 
