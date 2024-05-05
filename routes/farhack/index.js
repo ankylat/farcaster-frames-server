@@ -44,7 +44,7 @@ router.get("/", async (req, res) => {
 router.get("/image", async (req, res) => {
   try {
     const imageCopy = decodeURIComponent(req.query.text);
-    console.log("THE IMAGE COPY IS: ", imageCopy);
+    console.log("the image copy is: ", req.query.text, imageCopy);
     const userPrompt = decodeURIComponent(req.query.userPrompt) || "";
     const imageWidth = 800;
     const imageHeight = 600;
@@ -175,6 +175,7 @@ router.post("/second-frame", async (req, res) => {
   try {
     let imageCopy;
     const fullUrl = req.protocol + "://" + req.get("host");
+    let millisecondsPerHours = 8 * 60 * 60 * 1000;
     if (req.body.untrustedData.inputText) {
       let inputText = req.body.untrustedData.inputText;
       let isValidNumber = Number(inputText);
@@ -252,28 +253,24 @@ router.post("/second-frame", async (req, res) => {
         const responseFromReplying = await replyToThisUserRightNow(
           req.body.untrustedData.fid
         );
-        if (responseFromReplying.success) {
-          let thisHeader = `your wishes are my commands.`;
-          imageCopy = `check your notifications`;
-          return res.status(200).send(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>${botName}</title>
-          <meta property="og:title" content="anky mint">
-          <meta property="og:image" content=${fullUrl}/farhack/image?text=}>
-          <meta name="fc:frame" content="vNext">
-          <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
-            imageCopy
-          )}&userPrompt=${encodeURIComponent(thisHeader)}>
-          <meta name="fc:frame:post_url" content="${fullUrl}/farhack/second-frame" />
-          </head>
-        </html>
-          `);
-        }
-      } else {
-        imageCopy = "you are all set";
-        return res.status(200).send(`
+      } else if (Number(req.body.untrustedData.buttonIndex) == 2) {
+        await replyToThisUserRightNow(req.body.untrustedData.fid);
+        setTimeout(() => {
+          replyToThisUserRightNow(req.body.untrustedData.fid);
+        }, (millisecondsPerHours * 6) / 10);
+      } else if (Number(req.body.untrustedData.buttonIndex) == 3) {
+        await replyToThisUserRightNow(req.body.untrustedData.fid);
+        setTimeout(() => {
+          replyToThisUserRightNow(req.body.untrustedData.fid);
+        }, millisecondsPerHours * 2);
+        setTimeout(() => {
+          replyToThisUserRightNow(req.body.untrustedData.fid);
+        }, millisecondsPerHours * 3);
+      }
+      let theUserPrompt = "your wishes are my commands.";
+      imageCopy = "check your notifications";
+
+      return res.status(200).send(`
           <!DOCTYPE html>
           <html>
           <head>
@@ -282,13 +279,12 @@ router.post("/second-frame", async (req, res) => {
             <meta property="og:image" content=${fullUrl}/farhack/image?text=}>
             <meta name="fc:frame" content="vNext">
             <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
-          imageCopy
-        )}&userPrompt=${req.body.untrustedData.buttonIndex}>
+        imageCopy
+      )}&userPrompt=${theUserPrompt}>
             <meta name="fc:frame:post_url" content="${fullUrl}/farhack/second-frame" />
             </head>
           </html>
             `);
-      }
     }
 
     imageCopy = "are you sure?";
@@ -569,14 +565,8 @@ async function createInstantaneousCastForThisUser(fid) {
 
 async function updateUserWithReplyFrequency(fid, replyFrequency) {
   try {
-    const prismaResponse = await prisma.user.updateUnique({
-      where: {
-        fid: fid,
-      },
-      data: {
-        replyFrequency: replyFrequency,
-      },
-    });
+    console.log("the reply frequency is ", replyFrequency);
+    console.log("fid", fid);
     return { success: true };
   } catch (error) {
     console.log("there was an error on the reply frequency", error);
@@ -590,7 +580,7 @@ async function getBotInitialReply(userFid) {
     const messages = [
       {
         role: "system",
-        content: `Say something funny to the user, but on a sarcastic language. your mission is to make the user smile.`,
+        content: `Say something funny to the user, but on a sarcastic language. your mission is to make the user smile. Less than 280 characters.`,
       },
       { role: "user", content: "" },
     ];
@@ -748,7 +738,7 @@ async function findCastAndGetTextToReplyToUser(fid, randomCast) {
     const messages = [
       {
         role: "system",
-        content: `Your mission is to tease the user. Please reply to this message with less than 300 characters, teasing the person that will read. This text will be replied to the following cast:`,
+        content: `Your mission is to tease the user. Please reply to this message with less than 300 characters, teasing the person that will read. Less than 280 characters. This text will be replied to the following cast:`,
       },
       { role: "user", content: randomCast.text },
     ];
