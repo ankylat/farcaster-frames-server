@@ -125,6 +125,7 @@ router.post("/", async (req, res) => {
     },
     update: {},
   });
+  console.log("the user is: ", user);
   if (!user.fetchedUserData) {
     const responseFromQueryingData = await queryUserDataFromNeynar(
       req.body.untrustedData.fid
