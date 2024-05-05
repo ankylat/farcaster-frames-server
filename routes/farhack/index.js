@@ -508,8 +508,6 @@ async function getUserGroup() {
   }
 }
 
-getUserGroup();
-
 async function queryUserDataFromNeynar(fid) {
   const allUserCastsText = [];
   const allUserFollowingBios = [];
