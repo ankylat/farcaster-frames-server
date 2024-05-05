@@ -44,6 +44,7 @@ router.get("/", async (req, res) => {
 router.get("/image", async (req, res) => {
   try {
     const imageCopy = decodeURIComponent(req.query.text);
+    console.log("THE IMAGE COPY IS: ", imageCopy);
     const userPrompt = decodeURIComponent(req.query.userPrompt) || "";
     const imageWidth = 800;
     const imageHeight = 600;
@@ -323,7 +324,7 @@ router.post("/third-frame", async (req, res) => {
       console.log("HERE");
       let gameOver = "game over";
       imageCopy = "you wont get more replies from me";
-      console.log("right before this");
+      console.log("right before this", gameOver);
 
       return res.status(200).send(`
       <!DOCTYPE html>
@@ -350,7 +351,6 @@ router.post("/third-frame", async (req, res) => {
         <head>
           <title>${botName}</title>
           <meta property="og:title" content="farhack gtp">
-          <meta property="og:image" content=${fullUrl}/farhack/image?text=}>
           <meta name="fc:frame" content="vNext">
           <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
         imageCopy
@@ -462,8 +462,6 @@ router.get("/bot", async (req, res) => {
     const fullUrl = req.protocol + "://" + req.get("host");
     let imageCopy = `rate the reply. your response will be used anonymously as weight to fine tune this ai agent.`;
 
-    // ADD A CONDITION FOR THE CAST ACTION: HAS THE USER ACTIVATED THE BOT? IF SO, CONTINUE WITH THIS FLOW. IF NOT, DISPLAY THE ORIGINAL FRAME TO ACTIVATE IT
-
     res.setHeader("Content-Type", "text/html");
     return res.status(200).send(`
       <!DOCTYPE html>
@@ -494,9 +492,10 @@ router.post("/bot", async (req, res) => {
     const fullUrl = req.protocol + "://" + req.get("host");
     res.setHeader("Content-Type", "text/html");
     const stepOfImage = Number(req.query.stepOfImage);
+    console.log("THE STEP OF IMAAAAGE IS: ", stepOfImage);
     if (stepOfImage == 4) {
       const remainingReplies = "you used your 3 credits for this frame";
-      botResponse = "see you soon again";
+      botResponse = "see you soon";
       return res.status(200).send(`
       <!DOCTYPE html>
       <html>
