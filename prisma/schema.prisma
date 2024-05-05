@@ -24,7 +24,7 @@ model User {
 }
 
 model CastRepliedToUser {
-  castHash                   String   @id @unique
+  castHash                   String    @id @unique
   fid                        Int
   originalCastText           String
   replyCastText              String
@@ -32,19 +32,5 @@ model CastRepliedToUser {
   ratingFromUser             Int
   timestampOfReply           DateTime
   timestampOfUserInteraction DateTime
-  iceBreakerText             String
-  user                       User     @relation(fields: [fid], references: [fid])
+  user                       User       @relation(fields: [fid], references: [fid])
 }
-
-model IceBreaker {
-  id                    Int    @id @default(autoincrement())
-  initialIcebreaker     String
-  userConversationOne   String
-  botReplyOne           String
-  userConversationTwo   String
-  botReplyTwo           String
-  userConversationThree String
-  botReplyThree         String
-  comeBackTomorrow      String
-}
-

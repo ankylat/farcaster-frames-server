@@ -491,10 +491,11 @@ router.post("/bot", async (req, res) => {
     let botResponse;
     const fullUrl = req.protocol + "://" + req.get("host");
     res.setHeader("Content-Type", "text/html");
-    const stepOfImage = Number(req.query.stepOfImage);
-    console.log("THE STEP OF IMAAAAGE IS: ", stepOfImage);
+    const stepOfImage = Number(req.query.stepOfImage) || 1;
     if (stepOfImage == 4) {
-      const remainingReplies = "you used your 3 credits for this frame";
+      const remainingReplies = await talkToBot(
+        req.body.untrustedData.inputText
+      );
       botResponse = "see you soon";
       return res.status(200).send(`
       <!DOCTYPE html>
@@ -507,9 +508,9 @@ router.post("/bot", async (req, res) => {
       )}}>
         <meta name="fc:frame" content="vNext">
         <meta name="fc:frame:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
-        botResponse
-      )}&userPrompt=${encodeURIComponent(
         remainingReplies
+      )}&userPrompt=${encodeURIComponent(
+        req.body.untrustedData.inputText
       )}&stepOfImage=${stepOfImage}>
         <meta name="fc:frame:post_url" content="${fullUrl}/farhack/bot?stepOfImage=${
         stepOfImage + 1
@@ -556,8 +557,6 @@ async function createInstantaneousCastForThisUser(fid) {
     });
     if (response) {
       const repliedToUser = await replyToThisUserRightNow(fid);
-      console.log("the replied to user is: ", repliedToUser);
-      // UPDATE THIS USER WITH A NEW REPLY IN THE ARRAY OF THE LAST 3 REPLIES. WE NEED TO CHECK IF THE AMOUNT OF REPLIES THAT THE USER HAS GOTTEN ON THE LAST DAY CORRESPONDS TO THIS NUMBER AND IF NOT SEGREGATE THEM INTO THE FUTURE WITH A CRON JOB THAT STAYS RUNNING
     } else {
       throw new Error(
         "there was an error creating the instantaneous cast for this user"
