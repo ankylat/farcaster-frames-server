@@ -274,9 +274,9 @@ router.post("/second-frame", async (req, res) => {
         <head>
           <title>${botName}</title>
           <meta property="og:title" content="anky mint">
-          <meta property="og:image" content=${fullUrl}/farhack/bot-image?text=}>
+          <meta property="og:image" content=${fullUrl}/farhack/image?text=}>
           <meta name="fc:frame" content="vNext">
-          <meta name="fc:frame:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
+          <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
             imageCopy
           )}&userPrompt=${encodeURIComponent(thisHeader)}>
           <meta name="fc:frame:post_url" content="${fullUrl}/farhack/second-frame" />
@@ -292,9 +292,9 @@ router.post("/second-frame", async (req, res) => {
           <head>
             <title>${botName}</title>
             <meta property="og:title" content="anky mint">
-            <meta property="og:image" content=${fullUrl}/farhack/bot-image?text=}>
+            <meta property="og:image" content=${fullUrl}/farhack/image?text=}>
             <meta name="fc:frame" content="vNext">
-            <meta name="fc:frame:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
+            <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
           imageCopy
         )}&userPrompt=${req.body.untrustedData.buttonIndex}>
             <meta name="fc:frame:post_url" content="${fullUrl}/farhack/second-frame" />
