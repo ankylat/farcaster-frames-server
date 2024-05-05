@@ -117,6 +117,8 @@ router.get("/image", async (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
+    const fullUrl = req.protocol + "://" + req.get("host");
+    let imageCopy;
     const user = await prisma.user.upsert({
       where: {
         fid: req.body.untrustedData.fid,
@@ -137,8 +139,7 @@ router.post("/", async (req, res) => {
         }, 5000);
       }
     }
-    const fullUrl = req.protocol + "://" + req.get("host");
-    const imageCopy = "how many replies do you want to receive daily?";
+    imageCopy = "how many replies do you want to receive daily?";
     return res.status(200).send(`
       <!DOCTYPE html>
       <html>

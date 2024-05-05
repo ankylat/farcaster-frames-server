@@ -20,6 +20,7 @@ model User {
   casts             String[]
   followingBios     String[]
   CastRepliedToUser CastRepliedToUser[]
+  testing           String?
 }
 
 model CastRepliedToUser {
