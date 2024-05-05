@@ -189,7 +189,7 @@ router.post("/second-frame", async (req, res) => {
             createInstantaneousCastForThisUser(fid);
           }
           if (response.success) {
-            imageCopy = `your preference is known. check your notifications.`;
+            imageCopy = `your preference is known.`;
           } else {
             imageCopy = `there was an error. please try again`;
           }
@@ -214,7 +214,7 @@ router.post("/second-frame", async (req, res) => {
         <head>
           <title>${botName}</title>
           <meta property="og:title" content="anky mint">
-          <meta property="og:image" content=${fullUrl}/farhack/image?text=}>
+          <meta property="og:image" content=${fullUrl}/farhack/image}>
           <meta name="fc:frame" content="vNext">
           <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
             imageCopy
@@ -254,19 +254,12 @@ router.post("/second-frame", async (req, res) => {
           req.body.untrustedData.fid
         );
       } else if (Number(req.body.untrustedData.buttonIndex) == 2) {
-        console.log(
-          `a reply is going to sent now and be scheduled for the future`
-        );
         await replyToThisUserRightNow(req.body.untrustedData.fid);
         setTimeout(() => {
           replyToThisUserRightNow(req.body.untrustedData.fid);
         }, (millisecondsPerHours * 6) / 10);
       } else if (Number(req.body.untrustedData.buttonIndex) == 3) {
         await replyToThisUserRightNow(req.body.untrustedData.fid);
-        console.log(
-          `a reply is going to sent now and be scheduled for the future two times`
-        );
-
         setTimeout(() => {
           replyToThisUserRightNow(req.body.untrustedData.fid);
         }, millisecondsPerHours * 2);
@@ -275,7 +268,7 @@ router.post("/second-frame", async (req, res) => {
         }, millisecondsPerHours * 3);
       }
       let theUserPrompt = "your wishes are my commands.";
-      imageCopy = "check your notifications";
+      imageCopy = "you have been notified";
 
       return res.status(200).send(`
           <!DOCTYPE html>
@@ -322,12 +315,9 @@ router.post("/third-frame", async (req, res) => {
   try {
     let imageCopy;
     const fullUrl = req.protocol + "://" + req.get("host");
-    console.log("inside the frame server", req.body);
     if (req.body.untrustedData.buttonIndex == 1) {
-      console.log("HERE");
       let gameOver = "game over";
       imageCopy = "you wont get more replies from me";
-      console.log("right before this", gameOver);
 
       return res.status(200).send(`
       <!DOCTYPE html>
@@ -347,7 +337,6 @@ router.post("/third-frame", async (req, res) => {
         `);
     } else {
       imageCopy = "how many replies do you want to receive daily?";
-      console.log("IN HEREEEE");
       return res.status(200).send(`
         <!DOCTYPE html>
         <html>
@@ -766,21 +755,23 @@ async function findCastAndGetTextToReplyToUser(fid, randomCast) {
 
 async function talkToBot(userText) {
   try {
-    const messages = [
-      {
-        role: "system",
-        content: `You are a fun member of a social media network called Farcaster. You are interacting with the user through a farcaster frame, and your mission is to reply to what the user just said teasing her.`,
-      },
-      { role: "user", content: userText },
-    ];
+    const response = await axios.post("http://localhost:8000", { userText });
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo-0125",
-      messages: messages,
-    });
+    // const messages = [
+    //   {
+    //     role: "system",
+    //     content: `You are a fun member of a social media network called Farcaster. You are interacting with the user through a farcaster frame, and your mission is to reply to what the user just said teasing her.`,
+    //   },
+    //   { role: "user", content: userText },
+    // ];
 
-    const replyFromTheBot = completion.choices[0].message.content;
-    return replyFromTheBot;
+    // const completion = await openai.chat.completions.create({
+    //   model: "gpt-3.5-turbo-0125",
+    //   messages: messages,
+    // });
+
+    // const replyFromTheBot = completion.choices[0].message.content;
+    return response;
   } catch (error) {
     console.log("there was an error talking to the bot");
     return "";
