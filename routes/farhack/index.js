@@ -4,12 +4,18 @@ const axios = require("axios");
 const fs = require("fs");
 const sharp = require("sharp");
 const OpenAI = require("openai");
+const prisma = require("../../lib/prismaClient");
+const {
+  getAllUserCasts,
+  getAllUserFollowWithBios,
+} = require("../../lib/neynar");
 
 const openai = new OpenAI(process.env.OPENAI_API_KEY);
 
 ///////////// ACTIVATE THE BOT  ////////////////////////
 
-const botName = `yiaju`;
+const botName = "farhack gtp";
+const thingName = "farhack-gtp";
 
 router.get("/", async (req, res) => {
   try {
@@ -110,22 +116,42 @@ router.get("/image", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
+  const user = await prisma.user.upsert({
+    where: {
+      fid: req.body.untrustedData.fid,
+    },
+    create: {
+      fid: req.body.untrustedData.fid,
+    },
+    update: {},
+  });
+  if (!user.fetchedUserData) {
+    const responseFromQueryingData = await queryUserDataFromNeynar(
+      req.body.untrustedData.fid
+    );
+    if (!responseFromQueryingData.success) {
+      setTimeout(async () => {
+        await queryUserDataFromNeynar(req.body.untrustedData.fid);
+      }, 5000);
+    }
+  }
+
   try {
     const fullUrl = req.protocol + "://" + req.get("host");
-    const imageCopy = "replies to you per day?";
+    const imageCopy = "how many replies do you want to receive daily?";
     return res.status(200).send(`
       <!DOCTYPE html>
       <html>
       <head>
         <title>${botName}</title>
-        <meta property="og:title" content="anky mint">
+        <meta property="og:title" content="farhack gtp">
         <meta property="og:image" content=${fullUrl}/farhack/bot-image?text=}>
         <meta name="fc:frame" content="vNext">
         <meta name="fc:frame:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
       imageCopy
     )}&userPrompt=${encodeURIComponent("welcome to farhack gtp")}>
         <meta name="fc:frame:post_url" content="${fullUrl}/farhack/second-frame" />
-        <meta name="fc:frame:button:1" content="1" />
+        <meta name="fc:frame:button:1" content="now" />
         <meta name="fc:frame:button:2" content="2" />
         <meta name="fc:frame:button:3" content="3" />
         <meta name="fc:frame:button:4" content="custom" />
@@ -147,7 +173,19 @@ router.post("/second-frame", async (req, res) => {
       let isValidNumber = Number(inputText);
       if (isValidNumber) {
         if (isValidNumber < 11) {
-          imageCopy = `your preference is known.`;
+          const response = await updateUserWithReplyFrequency(
+            fid,
+            isValidNumber
+          );
+          if (isValidNumber == 1) {
+            createInstantaneousCastForThisUser(fid);
+          }
+          if (response.success) {
+            imageCopy = `your preference is known.`;
+          } else {
+            imageCopy = `there was an error. please try again`;
+          }
+
           return res.status(200).send(`
         <!DOCTYPE html>
         <html>
@@ -337,7 +375,6 @@ router.get("/bot", async (req, res) => {
         <meta name="fc:frame:button:1" content="⭐️" />
         <meta name="fc:frame:button:2" content="⭐️⭐️" />
         <meta name="fc:frame:button:3" content="⭐️⭐️⭐️" />
-        <meta name="fc:frame:button:4" content="⭐️⭐️⭐️⭐️" />
         </head>
       </html>
         `);
@@ -361,7 +398,6 @@ router.post("/bot", async (req, res) => {
     } else {
       botResponse = await getBotInitialReply(req.body.untrustedData.fid);
     }
-    console.log("la primera ruta");
     return res.status(200).send(`
       <!DOCTYPE html>
       <html>
@@ -387,12 +423,46 @@ router.post("/bot", async (req, res) => {
   }
 });
 
+async function createInstantaneousCastForThisUser(fid) {
+  try {
+    const response = await prisma.user.findUnique({
+      where: { fid: fid },
+    });
+    if (response) {
+    } else {
+      throw new Error(
+        "there was an error creating the instantaneous cast for this user"
+      );
+    }
+  } catch (error) {
+    return { success: false };
+  }
+}
+
+async function updateUserWithReplyFrequency(fid, replyFrequency) {
+  try {
+    const prismaResponse = await prisma.user.updateUnique({
+      where: {
+        fid: fid,
+      },
+      data: {
+        replyFrequency: replyFrequency,
+      },
+    });
+    return { success: true };
+  } catch (error) {
+    console.log("there was an error on the reply frequency", error);
+    return { success: false };
+  }
+}
+
 async function getBotInitialReply(userFid) {
+  const userSpecificInformation = await getUserSpecificInformation(userFid);
   try {
     const messages = [
       {
         role: "system",
-        content: `You need to distill context of the person that you are interacting based on her social graph on farcaster, and their interactions with the protocol in the form of casts, recasts and replies. The fid of that person is ${userFid}. Reply just with a one sentence inquiry that invites the person to think critically. Nothing more, nothing less. Be sharp and precise.`,
+        content: `Say something funny to the user, but on a sarcastic language. your mission is to make the user smile.`,
       },
       { role: "user", content: "" },
     ];
@@ -407,6 +477,75 @@ async function getBotInitialReply(userFid) {
   } catch (error) {
     return "hello world";
   }
+}
+
+async function getUserSpecificInformation(fid) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { fid: fid },
+    });
+    return user;
+  } catch (error) {
+    console.log("there was an error here", error);
+    return null;
+  }
+}
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function getUserGroup() {
+  try {
+    console.log("inside the get user group function");
+    for (let i = 0; i < 20000; i++) {
+      await queryUserDataFromNeynar(i);
+      await delay(300); // Wait for 300 ms before the next iteration
+    }
+    console.log("FINISHED");
+  } catch (error) {
+    console.log("EEEEERRROR", error);
+  }
+}
+
+getUserGroup();
+
+async function queryUserDataFromNeynar(fid) {
+  const allUserCastsText = [];
+  const allUserFollowingBios = [];
+  try {
+    const allCastsFromUserNeynarResponse = await getAllUserCasts(fid);
+    const allFollowsOfUserNeynarResponse = await getAllUserFollowWithBios(fid);
+    for (let cast of allCastsFromUserNeynarResponse) {
+      allUserCastsText.push(cast.text);
+    }
+    for (let userFollow of allFollowsOfUserNeynarResponse) {
+      allUserFollowingBios.push(userFollow.user.profile.bio.text);
+    }
+    await prisma.user.update({
+      where: { fid: fid },
+      data: {
+        fetchedUserData: true,
+        casts: allUserCastsText,
+        followingBios: allUserFollowingBios,
+      },
+    });
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.log("there was an error retrieving this information", error);
+    return {
+      success: false,
+    };
+  }
+}
+
+async function findCastAndReplyToUser(fid, timestampForCast) {
+  try {
+    // request al LLM : casts - bio - random selected cast
+    // respuesta a ese cast en particular, un string de texto
+  } catch (error) {}
 }
 
 async function talkToBot(userText) {
