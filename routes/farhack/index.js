@@ -577,7 +577,9 @@ async function replyToThisUserRightNow(fid) {
 
     let castOptions = {
       text: textForReplying,
-      embeds: [`https://farcaster-frames-server.onrender.com/farhack/bot`],
+      embeds: [
+        { url: "https://farcaster-frames-server.onrender.com/farhack/bot" },
+      ],
       parent: randomCastFromThisUser.hash,
       signer_uuid: process.env.NEYNAR_ANKY_SIGNER,
     };
