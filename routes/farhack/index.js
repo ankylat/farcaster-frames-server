@@ -128,7 +128,6 @@ router.post("/", async (req, res) => {
       },
       update: {},
     });
-    console.log("the user is: ", user);
     if (!user.fetchedUserData) {
       const responseFromQueryingData = await queryUserDataFromNeynar(
         req.body.untrustedData.fid
@@ -200,7 +199,6 @@ router.post("/second-frame", async (req, res) => {
           if (isValidNumber == 1) {
             createInstantaneousCastForThisUser(fid);
           }
-          console.log("IN HERE");
           if (response.success) {
             imageCopy = `your preference is known. check your notifications.`;
           } else {
@@ -344,12 +342,12 @@ router.post("/second-frame", async (req, res) => {
 
 router.get("/bot-image", async (req, res) => {
   try {
-    const imageCopy = decodeURIComponent(req.query.text); // This is the response
-    const userPrompt = decodeURIComponent(req.query.userPrompt) || ""; // This is the prompt
-    const imageWidth = 800; // Set your desired width
-    const imageHeight = 600; // Set your desired height
+    const imageCopy = decodeURIComponent(req.query.text);
+    const userPrompt = decodeURIComponent(req.query.userPrompt) || "";
+    const step = parseInt(req.query.stepOfImage, 10) || 1;
+    const imageWidth = 800;
+    const imageHeight = 600;
 
-    // Function to wrap text into lines
     function wrapText(text, maxChars) {
       const words = text.split(" ");
       const lines = [];
@@ -368,26 +366,38 @@ router.get("/bot-image", async (req, res) => {
       return lines;
     }
 
-    // Wrapping the response text
-    const lines = wrapText(imageCopy, Math.floor(imageWidth / 20)); // Adjust based on your font size
-    const responsePositionStart = imageHeight * 0.5; // Start response in the middle of the image
+    const lines = wrapText(imageCopy, Math.floor(imageWidth / 20));
+    const responsePositionStart = imageHeight * 0.5;
     const svgResponseText = lines
       .map(
         (line, index) =>
           `<text x="4%" y="${
-            (responsePositionStart / imageHeight) * 88 + index * 6
+            (responsePositionStart / imageHeight) * 80 + index * 6
           }%" fill="white" font-family="sans-serif" font-size="28" font-weight="bold">${line}</text>`
       )
       .join("");
 
-    // Creating SVG with both prompt and response
-    const blackBackgroundSVG = `<svg width="${imageWidth}" height="${imageHeight}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${imageWidth} ${imageHeight}">
+    const circleRadius = 8;
+    const circleSpacing = 30; // 20px between circles
+    const circleDiameter = circleRadius * 2;
+    const circleBaseX = imageWidth / 2 - (circleDiameter + circleSpacing); // Adjusted for center alignment
+
+    const circlesSVG = Array.from({ length: 4 })
+      .map((_, i) => {
+        const xPosition = circleBaseX + i * (circleDiameter + circleSpacing);
+        const fill = i + 1 <= step ? "green" : "none";
+        return `<circle cx="${xPosition}" cy="80%" r="${circleRadius}" fill="${fill}" stroke="white" stroke-width="2"/>`;
+      })
+      .join("");
+
+    const svgContent = `<svg width="${imageWidth}" height="${imageHeight}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${imageWidth} ${imageHeight}">
       <rect width="100%" height="100%" fill="black"></rect>
-      <text x="4%" y="33%" fill="green" font-family="sans-serif" font-size="32" font-weight="bold">${userPrompt}</text>
+      <text x="4%" y="28%" fill="green" font-family="sans-serif" font-size="32" font-weight="bold">${userPrompt}</text>
       ${svgResponseText}
+      ${circlesSVG}
     </svg>`;
 
-    const buffer = Buffer.from(blackBackgroundSVG);
+    const buffer = Buffer.from(svgContent);
     sharp(buffer)
       .toFormat("png")
       .toBuffer()
@@ -423,8 +433,8 @@ router.get("/bot", async (req, res) => {
         <meta name="fc:frame" content="vNext">
         <meta name="fc:frame:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
       imageCopy
-    )}&userPrompt=${encodeURIComponent("welcome to farhack gtp")}>
-        <meta name="fc:frame:post_url" content="${fullUrl}/farhack/bot" />
+    )}&userPrompt=${encodeURIComponent("welcome to farhack gtp")}&stepOfImage=1>
+        <meta name="fc:frame:post_url" content="${fullUrl}/farhack/bot?stepOfImage=2" />
         <meta name="fc:frame:button:1" content="⭐️" />
         <meta name="fc:frame:button:2" content="⭐️⭐️" />
         <meta name="fc:frame:button:3" content="⭐️⭐️⭐️" />
@@ -439,13 +449,41 @@ router.get("/bot", async (req, res) => {
 
 router.post("/bot", async (req, res) => {
   try {
+    let botResponse;
     const fullUrl = req.protocol + "://" + req.get("host");
     res.setHeader("Content-Type", "text/html");
-    let botResponse;
+    const stepOfImage = Number(req.query.stepOfImage);
+    if (stepOfImage == 4) {
+      const remainingReplies = "you used your 3 credits for this frame";
+      botResponse = "see you soon again";
+      return res.status(200).send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${botName}</title>
+        <meta property="og:title" content="anky mint">
+        <meta property="og:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
+        botResponse
+      )}}>
+        <meta name="fc:frame" content="vNext">
+        <meta name="fc:frame:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
+        botResponse
+      )}&userPrompt=${encodeURIComponent(
+        remainingReplies
+      )}&stepOfImage=${stepOfImage}>
+        <meta name="fc:frame:post_url" content="${fullUrl}/farhack/bot?stepOfImage=${
+        stepOfImage + 1
+      }" />
+        </head>
+      </html>
+        `);
+    }
 
     let userText =
-      req.body.untrustedData.inputText ||
-      `you voted ${req.body.untrustedData.buttonIndex}.`;
+      stepOfImage == "2"
+        ? req.body.untrustedData.inputText ||
+          "⭐️".repeat(req.body.untrustedData.buttonIndex)
+        : req.body.untrustedData.inputText;
     if (req.body.untrustedData.inputText) {
       botResponse = await talkToBot(userText);
     } else {
@@ -457,14 +495,13 @@ router.post("/bot", async (req, res) => {
       <head>
         <title>${botName}</title>
         <meta property="og:title" content="anky mint">
-        <meta property="og:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
-      botResponse
-    )}}>
         <meta name="fc:frame" content="vNext">
         <meta name="fc:frame:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
       botResponse
-    )}&userPrompt=${encodeURIComponent(userText)}>
-        <meta name="fc:frame:post_url" content="${fullUrl}/farhack/bot" />
+    )}&userPrompt=${encodeURIComponent(userText)}&stepOfImage=${stepOfImage}>
+        <meta name="fc:frame:post_url" content="${fullUrl}/farhack/bot?stepOfImage=${
+      stepOfImage + 1
+    }" />
         <meta name="fc:frame:input:text" content="..." />
         <meta name="fc:frame:button:1" content="↑" />
         </head>
