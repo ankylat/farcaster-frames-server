@@ -481,8 +481,7 @@ router.post("/bot", async (req, res) => {
 
     let userText =
       stepOfImage == "2"
-        ? req.body.untrustedData.inputText ||
-          "⭐️".repeat(req.body.untrustedData.buttonIndex)
+        ? "⭐️".repeat(req.body.untrustedData.buttonIndex)
         : req.body.untrustedData.inputText;
     if (req.body.untrustedData.inputText) {
       botResponse = await talkToBot(userText);
