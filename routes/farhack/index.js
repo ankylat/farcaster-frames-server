@@ -44,19 +44,9 @@ router.get("/", async (req, res) => {
 router.get("/image", async (req, res) => {
   try {
     const imageCopy = decodeURIComponent(req.query.text);
-
-    const response = await axios({
-      url: "https://github.com/jpfraneto/images/blob/main/first_frame_image.png?raw=true",
-      responseType: "arraybuffer",
-    });
-    const imageBuffer = Buffer.from(response.data, "binary");
-    const metadata = await sharp(imageBuffer).metadata();
-    const imageWidth = metadata.width;
-    const imageHeight = metadata.height;
-
-    // approximate maximum characters per line based on the image width
-
-    const maxCharsPerLine = Math.floor(imageWidth / 20); // rough estimate, adjust as needed
+    const userPrompt = decodeURIComponent(req.query.userPrompt) || "";
+    const imageWidth = 800;
+    const imageHeight = 600;
 
     function wrapText(text, maxChars) {
       const words = text.split(" ");
@@ -64,7 +54,7 @@ router.get("/image", async (req, res) => {
       let currentLine = words[0];
 
       words.slice(1).forEach((word) => {
-        if (currentLine.length + word.length + 1 < maxChars) {
+        if (currentLine.length + word.length + 1 <= maxChars) {
           currentLine += " " + word;
         } else {
           lines.push(currentLine);
@@ -76,31 +66,28 @@ router.get("/image", async (req, res) => {
       return lines;
     }
 
-    const lines = wrapText(imageCopy, maxCharsPerLine);
-    const lineHeight = 48; // line height in pixels, corresponds to font size
-    const svgTextElements = lines
+    const lines = wrapText(imageCopy, Math.floor(imageWidth / 20));
+    const responsePositionStart = imageHeight * 0.5;
+    const svgResponseText = lines
       .map(
         (line, index) =>
-          `<text x="12%" y="${
-            25 + index * ((lineHeight / imageHeight) * 100)
-          }%" class="text" dominant-baseline="hanging">${line}</text>`
+          `<text x="4%" y="${
+            (responsePositionStart / imageHeight) * 80 + index * 6
+          }%" fill="white" font-family="sans-serif" font-size="28" font-weight="bold">${line}</text>`
       )
       .join("");
 
-    const blackOverlay = `<svg width="${imageWidth}" height="${imageHeight}" xmlns="http://www.w3.org/2000/svg">
-          <rect width="100%" height="100%" fill="black" fill-opacity="0.6"></rect>
-          <style>
-            .text { font: bold 48px sans-serif; fill: white; text-anchor: start; }
-          </style>
-          ${svgTextElements}
-        </svg>`;
+    const svgContent = `<svg width="${imageWidth}" height="${imageHeight}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${imageWidth} ${imageHeight}">
+      <rect width="100%" height="100%" fill="black"></rect>
+      <text x="4%" y="28%" fill="green" font-family="sans-serif" font-size="32" font-weight="bold">${userPrompt}</text>
+      ${svgResponseText}
+    </svg>`;
 
-    sharp(imageBuffer)
-      .composite([{ input: Buffer.from(blackOverlay), gravity: "center" }])
+    const buffer = Buffer.from(svgContent);
+    sharp(buffer)
       .toFormat("png")
       .toBuffer()
       .then((outputBuffer) => {
-        // Optionally save to a file for debugging
         fs.writeFileSync("output_with_overlay.png", outputBuffer);
         res.setHeader("Content-Type", "image/png");
         res.send(outputBuffer);
@@ -145,16 +132,15 @@ router.post("/", async (req, res) => {
       <head>
         <title>${botName}</title>
         <meta property="og:title" content="farhack gtp">
-        <meta property="og:image" content=${fullUrl}/farhack/bot-image?text=}>
+        <meta property="og:image" content=${fullUrl}/farhack/image?text=}>
         <meta name="fc:frame" content="vNext">
-        <meta name="fc:frame:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
+        <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
       imageCopy
     )}&userPrompt=${encodeURIComponent("welcome to farhack gtp")}>
         <meta name="fc:frame:post_url" content="${fullUrl}/farhack/second-frame" />
         <meta name="fc:frame:button:1" content="now" />
         <meta name="fc:frame:button:2" content="2" />
         <meta name="fc:frame:button:3" content="3" />
-        <meta name="fc:frame:button:4" content="custom" />
         </head>
       </html>
         `);
@@ -238,7 +224,6 @@ router.post("/second-frame", async (req, res) => {
           `);
         }
       } else {
-        // this is the place
         imageCopy = req.body.untrustedData.inputText;
         return res.status(200).send(`
         <!DOCTYPE html>
@@ -285,7 +270,7 @@ router.post("/second-frame", async (req, res) => {
           `);
         }
       } else {
-        imageCopy = "you will be surprised";
+        imageCopy = "you are all set";
         return res.status(200).send(`
           <!DOCTYPE html>
           <html>
