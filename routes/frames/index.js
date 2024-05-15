@@ -14,7 +14,7 @@ const openai = new OpenAI(process.env.OPENAI_API_KEY);
 
 router.get("/image", async (req, res) => {
     try {
-      const responseFromIrys = await axios.get(`https://node1.irys.xyz/${req.query.cid}`);
+      const responseFromIrys = await axios.get(`https://node1.irys.xyz/${req.query.cid || ""}`);
       const text = responseFromIrys.data;
       const imageWidth = 800;
       const imageHeight = 800;
@@ -88,7 +88,7 @@ router.get("/image", async (req, res) => {
         <meta property="og:image" content="https://github.com/jpfraneto/images/blob/main/shhhe.png?raw=true">
         <meta name="fc:frame" content="vNext">
         <meta name="fc:frame:image" content="https://github.com/jpfraneto/images/blob/main/shhhe.png?raw=true">
-        <meta name="fc:frame:post_url" content="${fullUrl}/frames/cast?cid=${req.query.cid}">
+        <meta name="fc:frame:post_url" content="${fullUrl}/frames/cast?cid=${req.query.cid || ""}">
         <meta name="fc:frame:button:1" content="read on...">
       </head>
       </html>
@@ -102,7 +102,8 @@ router.get("/image", async (req, res) => {
   router.post("/cast", async (req, res) => {
     try {
       const fullUrl = req.protocol + "://" + req.get("host");
-      const fullAddUrl = `https://warpcast.com/~/add-cast-action?actionType=post&name=Invoke+Anky&icon=infinity&postUrl=${fullUrl}/invokeanky`;
+      const fullAddUrl = `https://warpcast.com/~/add-cast-action?actionType=post&name=Invoke+Anky&icon=infinity&postUrl=${encodeURIComponent("https://snarkyanky.lat")}/invokeanky`;
+
       console.log('the full add url is: ', fullAddUrl)
       res.setHeader("Content-Type", "text/html");
       res.status(200).send(`
@@ -111,9 +112,9 @@ router.get("/image", async (req, res) => {
       <head>
         <title>anky</title>
         <meta property="og:title" content="anky">
-        <meta property="og:image" content="${fullUrl}/frames/image?cid=${req.query.cid}">
+        <meta property="og:image" content="${fullUrl}/frames/image?cid=${req.query.cid || ""}">
         <meta name="fc:frame" content="vNext">
-        <meta name="fc:frame:image" content="${fullUrl}/frames/image?cid=${req.query.cid}">
+        <meta name="fc:frame:image" content="${fullUrl}/frames/image?cid=${req.query.cid || ""}">
         <meta name="fc:frame:image:aspect_ratio" content="1:1">
         <meta name="fc:frame:post_url" content="${
             fullAddUrl
