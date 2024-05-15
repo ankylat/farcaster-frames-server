@@ -60,9 +60,9 @@ app.delete("/delete-cast", async (req, res) => {
 
 app.post("/finish-session", async (req, res) => {
   try {
-    console.log('inside the finish session route', req.body);
+    const fullUrl = req.protocol + "://" + req.get("host");
     const irysReceiptHash = await uploadSessionToIrys(req.body.text);
-    const responseFromCasting = await castAnonymouslyWithFrame(req.body.text, irysReceiptHash);
+    const responseFromCasting = await castAnonymouslyWithFrame(req.body.text, irysReceiptHash, fullUrl);
     console.log("the response from casting is", responseFromCasting);
     res.status(200).json({...responseFromCasting, message: 'your text was casted through anky'});
   } catch (error) {
