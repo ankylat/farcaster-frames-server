@@ -76,6 +76,7 @@ router.get("/image", async (req, res) => {
 
   router.get("/cast", async (req, res) => {
     try {
+      console.log("the req.query is: ", req.query)
       const fullUrl = req.protocol + "://" + req.get("host");
       res.setHeader("Content-Type", "text/html");
       res.status(200).send(`
