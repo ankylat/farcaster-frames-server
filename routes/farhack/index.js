@@ -26,9 +26,9 @@ router.get("/", async (req, res) => {
     <head>
       <title>${botName}</title>
       <meta property="og:title" content="${botName}">
-      <meta property="og:image" content="https://github.com/jpfraneto/images/blob/main/snarky.png?raw=true">
+      <meta property="og:image" content="https://github.com/jpfraneto/images/blob/main/rate-my-reply.png?raw=true">
       <meta name="fc:frame" content="vNext">
-      <meta name="fc:frame:image" content="https://github.com/jpfraneto/images/blob/main/snarky.png?raw=true">
+      <meta name="fc:frame:image" content="https://github.com/jpfraneto/images/blob/main/rate-my-reply.png?raw=true">
       <meta name="fc:frame:post_url" content="${fullUrl}/farhack">
       <meta name="fc:frame:image:aspect_ratio" content="1:1">
       <meta name="fc:frame:button:1" content="activate">
@@ -470,9 +470,7 @@ router.get("/bot", async (req, res) => {
         <title>${botName}</title>
         <meta property="og:title" content="anky mint">
         <meta name="fc:frame" content="vNext">
-        <meta name="fc:frame:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
-      imageCopy
-    )}&userPrompt=${encodeURIComponent("welcome to farhack gtp")}&stepOfImage=1>
+        <meta name="fc:frame:image" content="https://github.com/jpfraneto/images/blob/main/rate-my-reply.png?raw=true">
         <meta name="fc:frame:post_url" content="${fullUrl}/farhack/bot?stepOfImage=2" />
         <meta name="fc:frame:button:1" content="⭐️" />
         <meta name="fc:frame:button:2" content="⭐️⭐️" />
@@ -520,11 +518,11 @@ router.post("/bot", async (req, res) => {
         `);
     }
 
-    let userText = stepOfImage == "2" ? "hello world" : req.body.untrustedData.inputText;
+    let userText = stepOfImage == "2" ? "any additional comments?" : req.body.untrustedData.inputText;
     if (req.body.untrustedData.inputText) {
       botResponse = await talkToBot(req.body.untrustedData.fid, userText);
     } else {
-      botResponse = await getBotInitialReply(req.body.untrustedData.fid, req.body.untrustedData.buttonIndex);
+      botResponse = ''
     }
     return res.status(200).send(`
       <!DOCTYPE html>
@@ -539,8 +537,8 @@ router.post("/bot", async (req, res) => {
         <meta name="fc:frame:post_url" content="${fullUrl}/farhack/bot?stepOfImage=${
       stepOfImage + 1
     }" />
-        <meta name="fc:frame:input:text" content="..." />
-        <meta name="fc:frame:button:1" content="↑" />
+        <meta name="fc:frame:input:text" content="write your comments to Anky here..." />
+        <meta name="fc:frame:button:1" content="send" />
         </head>
       </html>
         `);
