@@ -14,8 +14,7 @@ const openai = new OpenAI(process.env.OPENAI_API_KEY);
 
 ///////////// ACTIVATE THE BOT  ////////////////////////
 
-const botName = "farhack gtp";
-const thingName = "farhack-gtp";
+const botName = "snarky";
 
 router.get("/", async (req, res) => {
   try {
@@ -27,10 +26,11 @@ router.get("/", async (req, res) => {
     <head>
       <title>${botName}</title>
       <meta property="og:title" content="${botName}">
-      <meta property="og:image" content="https://github.com/jpfraneto/images/blob/main/first_frame_image.png?raw=true">
+      <meta property="og:image" content="https://github.com/jpfraneto/images/blob/main/snarky.png?raw=true">
       <meta name="fc:frame" content="vNext">
-      <meta name="fc:frame:image" content="https://github.com/jpfraneto/images/blob/main/first_frame_image.png?raw=true">
+      <meta name="fc:frame:image" content="https://github.com/jpfraneto/images/blob/main/snarky.png?raw=true">
       <meta name="fc:frame:post_url" content="${fullUrl}/farhack">
+      <meta name="fc:frame:image:aspect_ratio" content="1:1">
       <meta name="fc:frame:button:1" content="activate">
     </head>
     </html>
@@ -43,7 +43,8 @@ router.get("/", async (req, res) => {
 
 router.get("/image", async (req, res) => {
   try {
-    const imageCopy = decodeURIComponent(req.query.text);
+    console.log("time to get an image here", req.query)
+    const imageCopy = decodeURIComponent(req.query.text) || "";
     const userPrompt = decodeURIComponent(req.query.userPrompt) || "";
     const imageWidth = 800;
     const imageHeight = 600;
@@ -133,9 +134,11 @@ router.post("/", async (req, res) => {
       <head>
         <title>${botName}</title>
         <meta property="og:title" content="farhack gtp">
-        <meta property="og:image" content=${fullUrl}/farhack/image?text=}>
+        <meta property="og:image"  content=${fullUrl}/farhack/image?text=${encodeURIComponent(
+          imageCopy
+        )}&userPrompt=${encodeURIComponent("welcome to farhack gtp")}>
         <meta name="fc:frame" content="vNext">
-        <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
+        <meta name="fc:frame:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
       imageCopy
     )}&userPrompt=${encodeURIComponent("welcome to farhack gtp")}>
         <meta name="fc:frame:post_url" content="${fullUrl}/farhack/second-frame" />
@@ -214,9 +217,9 @@ router.post("/second-frame", async (req, res) => {
         <head>
           <title>${botName}</title>
           <meta property="og:title" content="anky mint">
-          <meta property="og:image" content=${fullUrl}/farhack/image}>
+          <meta property="og:image" content=${fullUrl}/farhack/bot-image}>
           <meta name="fc:frame" content="vNext">
-          <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
+          <meta name="fc:frame:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
             imageCopy
           )}&userPrompt=${encodeURIComponent("")}>
           <meta name="fc:frame:post_url" content="${fullUrl}/farhack/second-frame" />
@@ -234,9 +237,9 @@ router.post("/second-frame", async (req, res) => {
         <head>
           <title>${botName}</title>
           <meta property="og:title" content="anky mint">
-          <meta property="og:image" content=${fullUrl}/farhack/image?text=}>
+          <meta property="og:image" content=${fullUrl}/farhack/bot-image?text=}>
           <meta name="fc:frame" content="vNext">
-          <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
+          <meta name="fc:frame:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
           imageCopy
         )}>
           <meta name="fc:frame:post_url" content="${fullUrl}/farhack/second-frame" />
@@ -251,36 +254,39 @@ router.post("/second-frame", async (req, res) => {
     if ([1, 2, 3].includes(req.body.untrustedData.buttonIndex)) {
       if (Number(req.body.untrustedData.buttonIndex) == 1) {
         const responseFromReplying = await replyToThisUserRightNow(
-          req.body.untrustedData.fid
+          req.body.untrustedData.fid, fullUrl
         );
       } else if (Number(req.body.untrustedData.buttonIndex) == 2) {
-        await replyToThisUserRightNow(req.body.untrustedData.fid);
+        await replyToThisUserRightNow(req.body.untrustedData.fid, fullUrl);
         setTimeout(() => {
-          replyToThisUserRightNow(req.body.untrustedData.fid);
+          replyToThisUserRightNow(req.body.untrustedData.fid, fullUrl);
         }, (millisecondsPerHours * 6) / 10);
       } else if (Number(req.body.untrustedData.buttonIndex) == 3) {
-        await replyToThisUserRightNow(req.body.untrustedData.fid);
+        await replyToThisUserRightNow(req.body.untrustedData.fid, fullUrl);
         setTimeout(() => {
-          replyToThisUserRightNow(req.body.untrustedData.fid);
+          replyToThisUserRightNow(req.body.untrustedData.fid, fullUrl);
         }, millisecondsPerHours * 2);
         setTimeout(() => {
-          replyToThisUserRightNow(req.body.untrustedData.fid);
+          replyToThisUserRightNow(req.body.untrustedData.fid, fullUrl);
         }, millisecondsPerHours * 3);
       }
       let theUserPrompt = "your wishes are my commands.";
       imageCopy = "you have been notified";
-
       return res.status(200).send(`
           <!DOCTYPE html>
           <html>
           <head>
             <title>${botName}</title>
-            <meta property="og:title" content="anky mint">
-            <meta property="og:image" content=${fullUrl}/farhack/image?text=}>
+            <meta property="og:title" content="farhack bot">
+            <meta property="og:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
+              imageCopy
+            )}&userPrompt=${theUserPrompt}>
             <meta name="fc:frame" content="vNext">
-            <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
+            <meta name="fc:frame:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
         imageCopy
-      )}&userPrompt=${theUserPrompt}>
+      )}&userPrompt=${encodeURIComponent(
+        theUserPrompt
+      )}>
             <meta name="fc:frame:post_url" content="${fullUrl}/farhack/second-frame" />
             </head>
           </html>
@@ -295,9 +301,9 @@ router.post("/second-frame", async (req, res) => {
       <head>
         <title>${botName}</title>
         <meta property="og:title" content="anky mint">
-        <meta property="og:image" content=${fullUrl}/farhack/image?text=}>
+        <meta property="og:image" content=${fullUrl}/farhack/bot-image?text=}>
         <meta name="fc:frame" content="vNext">
-        <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
+        <meta name="fc:frame:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
       imageCopy
     )}&userPrompt=${encodeURIComponent(lastMessage)}>
         <meta name="fc:frame:post_url" content="${fullUrl}/farhack/third-frame" />
@@ -318,16 +324,18 @@ router.post("/third-frame", async (req, res) => {
     if (req.body.untrustedData.buttonIndex == 1) {
       let gameOver = "game over";
       imageCopy = "you wont get more replies from me";
-
+      let theUserPrompt = "";
       return res.status(200).send(`
       <!DOCTYPE html>
       <html>
       <head>
         <title>${botName}</title>
         <meta property="og:title" content="anky mint">
-        <meta property="og:image" content=${fullUrl}/farhack/image?text=}>
+        <meta property="og:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
+          imageCopy
+        )}&userPrompt=${theUserPrompt}>
         <meta name="fc:frame" content="vNext">
-        <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
+        <meta name="fc:frame:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
         imageCopy
       )}&userPrompt=${gameOver}>
         <meta name="fc:frame:post_url" content="${fullUrl}/farhack" />
@@ -344,7 +352,7 @@ router.post("/third-frame", async (req, res) => {
           <title>${botName}</title>
           <meta property="og:title" content="farhack gtp">
           <meta name="fc:frame" content="vNext">
-          <meta name="fc:frame:image" content=${fullUrl}/farhack/image?text=${encodeURIComponent(
+          <meta name="fc:frame:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
         imageCopy
       )}&userPrompt=${encodeURIComponent("welcome to farhack gtp")}>
           <meta name="fc:frame:post_url" content="${fullUrl}/farhack/second-frame" />
@@ -418,7 +426,7 @@ router.get("/bot-image", async (req, res) => {
     const circlesSVG = Array.from({ length: 4 })
       .map((_, i) => {
         const xPosition = circleBaseX + i * (circleDiameter + circleSpacing);
-        const fill = i + 1 <= step ? "green" : "none";
+        const fill = i + 1 <= step ? "white" : "none";
         return `<circle cx="${xPosition}" cy="80%" r="${circleRadius}" fill="${fill}" stroke="white" stroke-width="2"/>`;
       })
       .join("");
@@ -486,7 +494,7 @@ router.post("/bot", async (req, res) => {
     const stepOfImage = Number(req.query.stepOfImage) || 1;
     if (stepOfImage == 4) {
       const remainingReplies = await talkToBot(
-        req.body.untrustedData.inputText
+        req.body.untrustedData.fid, req.body.untrustedData.inputText
       );
       botResponse = "see you soon";
       return res.status(200).send(`
@@ -494,7 +502,7 @@ router.post("/bot", async (req, res) => {
       <html>
       <head>
         <title>${botName}</title>
-        <meta property="og:title" content="anky mint">
+        <meta property="og:title" content="snarky">
         <meta property="og:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
         botResponse
       )}}>
@@ -512,18 +520,18 @@ router.post("/bot", async (req, res) => {
         `);
     }
 
-    let userText = stepOfImage == "2" ? "" : req.body.untrustedData.inputText;
+    let userText = stepOfImage == "2" ? "hello world" : req.body.untrustedData.inputText;
     if (req.body.untrustedData.inputText) {
-      botResponse = await talkToBot(userText);
+      botResponse = await talkToBot(req.body.untrustedData.fid, userText);
     } else {
-      botResponse = await getBotInitialReply(req.body.untrustedData.fid);
+      botResponse = await getBotInitialReply(req.body.untrustedData.fid, req.body.untrustedData.buttonIndex);
     }
     return res.status(200).send(`
       <!DOCTYPE html>
       <html>
       <head>
         <title>${botName}</title>
-        <meta property="og:title" content="anky mint">
+        <meta property="og:title" content="snarky">
         <meta name="fc:frame" content="vNext">
         <meta name="fc:frame:image" content=${fullUrl}/farhack/bot-image?text=${encodeURIComponent(
       botResponse
@@ -561,8 +569,6 @@ async function createInstantaneousCastForThisUser(fid) {
 
 async function updateUserWithReplyFrequency(fid, replyFrequency) {
   try {
-    console.log("the reply frequency is ", replyFrequency);
-    console.log("fid", fid);
     return { success: true };
   } catch (error) {
     console.log("there was an error on the reply frequency", error);
@@ -601,40 +607,47 @@ function delay(ms) {
 
 // getUserGroup();
 
-async function replyToThisUserRightNow(fid) {
+async function replyToThisUserRightNow(fid, fullUrl) {
   try {
     // find random cast from this user on the last 24 hours, or 48, or 72
     const randomCastFromThisUser = await getRandomCastFromUser(fid);
-    const textForReplying = await findCastAndGetTextToReplyToUser(
-      fid,
-      randomCastFromThisUser
-    );
-
-    let castOptions = {
-      text: textForReplying,
-      embeds: [
-        { url: "https://farcaster-frames-server.onrender.com/farhack/bot" },
-      ],
-      parent: randomCastFromThisUser.hash,
-      signer_uuid: process.env.NEYNAR_ANKY_SIGNER,
-    };
-
-    try {
-      const response = await axios.post(
-        "https://api.neynar.com/v2/farcaster/cast",
-        castOptions,
-        {
-          headers: {
-            api_key: process.env.NEYNAR_API_KEY,
-          },
+    if(randomCastFromThisUser) {
+        console.log("the random cast from this user is ", randomCastFromThisUser)
+        const textForReplying = await findCastAndGetTextToReplyToUser(
+          fid,
+          randomCastFromThisUser
+        );
+    
+    
+        let castOptions = {
+          text: textForReplying,
+          embeds: [
+            { url:`${fullUrl}/farhack/bot` },
+          ],
+          parent: randomCastFromThisUser.hash,
+          signer_uuid: process.env.NEYNAR_ANKY_SIGNER,
+        };
+    
+        try {
+          const response = await axios.post(
+            "https://api.neynar.com/v2/farcaster/cast",
+            castOptions,
+            {
+              headers: {
+                api_key: process.env.NEYNAR_API_KEY,
+              },
+            }
+          );
+          return { success: true };
+        } catch (error) {
+          console.error(error);
+          return { success: false };
         }
-      );
-      return { success: true };
-    } catch (error) {
-      console.error(error);
-      return { success: false };
+        return { success: true };
+    } else {
+      console.log("there was no cast found for this user ", fid)
     }
-    return { success: true };
+   
   } catch (error) {
     console.log("there was an error here", error);
     return { success: false };
@@ -651,11 +664,18 @@ async function getRandomCastFromUser(fid) {
         },
       }
     );
-    const lastTenCasts = response.data.casts;
-    const randomCast =
-      lastTenCasts[Math.floor(lastTenCasts.length * Math.random())];
-    return randomCast;
-  } catch (error) {}
+    if(response?.data?.casts){
+      const lastTenCasts = response.data.casts;
+      const randomCast =
+        lastTenCasts[Math.floor(lastTenCasts.length * Math.random())];
+      return randomCast;
+    } else {
+      return {}
+    }
+  } catch (error) {
+    console.log("there was an error retrieveing the users casts from neynar", error)
+    return ""
+  }
 }
 
 async function queryUserDataFromNeynar(fid) {
@@ -713,6 +733,19 @@ function createChatTemplate(systemPrompt, userQuery) {
   return chatTemplate;
 }
 
+// todo: function with chat history
+function createChatTemplateHistory(systemPrompt, userQuery, history) {
+  let chat = `<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n${systemPrompt}<|eot_id|>`
+  // history es tuplas user,ai
+  for (tupleElement of history){
+    chat+= `<|start_header_id|>user<|end_header_id|>\n\n${tupleElement.user}<|eot_id|>`
+    chat+= `<|start_header_id|>assistant<|end_header_id|>\n\n${tupleElement.ai}<|eot_id|>`
+  }
+  chat+= `<|start_header_id|>user<|end_header_id|>\n\n${userQuery}<|eot_id|>`
+  return chat;
+}
+
+
 async function getCompletionFromLocalLLM(systemPrompt, text) {
   try {
     // Send a POST request to your local LLM server
@@ -731,55 +764,73 @@ async function getCompletionFromLocalLLM(systemPrompt, text) {
       }
     );
 
-    // Extract the completion from the response
     const completion = response.data.choices[0].text;
     return completion;
   } catch (error) {
     console.error("Error:", error);
+    console.log("the error issssss ", error)
     return "Failed to get completion from local LLM.";
   }
 }
 
-///////////^***************************************/
+///////////***************************************/
 
-async function getBotInitialReply(userFid) {
-  const userSpecificInformation = await getUserSpecificInformation(userFid);
+async function getBotInitialReply(userFid,userChoice) {
+  // first in chat after stars
+  // const userSpecificInformation = await getUserSpecificInformation(userFid);
   try {
-    const systemPrompt = `Say something funny to the user, but on a sarcastic language. your mission is to make the user smile. Less than 280 characters.`;
+    const user = await prisma.user.findUnique({ where: { fid: userFid } });
 
-    const dataResponse = await getCompletionFromLocalLLM(systemPrompt, "");
+    const systemPrompt = `You are a witty, sarcastic chatbot, your response is half-assed and a little mean but always in the good spirit of having fun, you replied over a social post for fun and laughs. Your mission was to tease the user by replying to a post we selected.
+    <CONTEXT>This were some of the recent user posts ${user.casts.join(', ')} and
+    the descriptions (bios) of the most relevant people that this user was following: ${user.followingBios.join(', ')} You have already replied and the user wants to chat.</CONTEXT>`;
+
+    const dataResponse = await getCompletionFromLocalLLM(systemPrompt, 
+      `<INSTRUCTION>Give an ice-breaker text to intrigue and make the person chat under 250 characters, teasing the person that will read. Repeat only with your reply.
+      Don't confront the user with this info, but in your previous fun reply the user rated you in a scale of 1,2,3 and chose ${userChoice}</INSTRUCTION>`
+      
+    );
     return dataResponse;
   } catch (error) {
     return "hello world";
   }
 }
 
-async function findCastAndGetTextToReplyToUser(fid, randomCast) {
+async function findCastAndGetTextToReplyToUser(userFid, randomCast) {
+  // first LLM call to reply
   try {
-    const user = await prisma.user.findUnique({ where: { fid: fid } });
-    const systemPrompt = `Your mission is to tease the user. Please reply to this message with less than 300 characters, teasing the person that will read. Less than 280 characters. This text will be replied to the following cast:`;
+    const user = await prisma.user.findUnique({ where: { fid: userFid } });
+    
+    const systemPrompt = `You are a witty, sarcastic chatbot, your response is half-assed and a little mean but always in the good spirit of having fun, the idea is to make the person laugh from your quick witted humor, replying over a social post for lols. Reply only with your reply. Your mission is to tease the user by replying to a post selected.
+    <CONTEXT>This is some of the recent user posts ${user.casts.join(', ')} and
+    the descriptions (bios) of the most relevant people that this user follows are: ${user.followingBios.join(', ')}.</CONTEXT>`;
     const dataResponse = await getCompletionFromLocalLLM(
       systemPrompt,
-      randomCast.text
+      `<INSTRUCTION>Please reply to the message input with less than 250 characters, only with the reply, teasing the person that will read. Your answer will be the reply to the following cast:${randomCast.text}</INSTRUCTION>`
     );
 
     return dataResponse;
   } catch (error) {
-    console.log("there was an error talking to the bot");
+    console.log("there was an error talking to the bo1t", error);
     return "";
   }
 }
 
-async function talkToBot(userText) {
+async function talkToBot(userFid, userText) {
+  // chat
   try {
-    const systemPrompt = `reply something funny to the motherfucking user`;
+    const user = await prisma.user.findUnique({ where: { fid: userFid } });
+    const systemPrompt = `reply something funny to the motherfucking user. You are a witty, sarcastic chatbot, your response is half-assed and a little mean but always in the good spirit of having fun, you replied a user's social post for fun and laughs. Your mission was to tease the user by replying to a post we selected.
+    <CONTEXT>This were some of the recent user posts ${user.casts.join(', ')}. You have already replied to the user, and he has started chatting with you voluntarily. Reply only with your reply.</CONTEXT>
+    <INSTRUCTION>Please reply to the user's latest chat message, only with the reply, with less than 250 characters</INSTRUCTION>`;
+
     const dataResponse = await getCompletionFromLocalLLM(
       systemPrompt,
       userText
     );
     return dataResponse;
   } catch (error) {
-    console.log("there was an error talking to the bot");
+    console.log("there was an error talking to the bo2t", error);
     return "";
   }
 }
