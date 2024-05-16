@@ -116,11 +116,11 @@ router.get("/image", async (req, res) => {
         <meta name="fc:frame" content="vNext">
         <meta name="fc:frame:image" content="${fullUrl}/frames/image?cid=${req.query.cid || ""}">
         <meta name="fc:frame:image:aspect_ratio" content="1:1">
-        <meta name="fc:frame:post_url" content="${
-            fullAddUrl
-          }">
-        <meta name="fc:frame:button:1:action" content="link" />
         <meta name="fc:frame:button:1" content="install invoke anky">
+        <meta name="fc:frame:button:1:action" content="link" />
+        <meta name="fc:frame:button:1:target" content="${
+            fullAddUrl
+          }" />
       </head>
       </html>
       `);
