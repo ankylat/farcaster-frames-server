@@ -119,7 +119,7 @@ router.get("/image", async (req, res) => {
         <meta name="fc:frame:post_url" content="${
             fullAddUrl
           }">
-        <meta name="fc:frame:button:1:action" content="post_redirect" />
+        <meta name="fc:frame:button:1:action" content="link" />
         <meta name="fc:frame:button:1" content="install invoke anky">
       </head>
       </html>
