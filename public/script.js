@@ -10,7 +10,7 @@ let intervalId;
 let castId;
 let userWriting;
 const secondsOfLife = 8;
-const apiRoute = 'https://snarkyanky.lat'; 
+const apiRoute = 'https://farcaster-frames-server-2.onrender.com'; 
 
 const handleTextChange = () => {
   lastKeystroke = Date.now();

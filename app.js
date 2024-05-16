@@ -63,6 +63,7 @@ app.delete("/delete-cast", async (req, res) => {
 app.post("/finish-session", async (req, res) => {
   try {
     const fullUrl = req.protocol + "://" + req.get("host");
+    console.log("inside the finish session route")
     const irysReceiptHash = await uploadSessionToIrys(req.body.text);
     const responseFromCasting = await castAnonymouslyWithFrame(req.body.text, irysReceiptHash, fullUrl);
     console.log("the response from casting is", responseFromCasting);
@@ -80,7 +81,7 @@ app.get("/invokeanky", async (req, res) => {
       "description": "Have @anky reply to this cast.",
       "action": {
           "type": "post",
-          "postUrl": `https://snarkyanky.lat/invokeanky`
+          "postUrl": `${process.env.SERVER_API_ROUTE}/invokeanky`
       }
     })
   } catch (error) {
