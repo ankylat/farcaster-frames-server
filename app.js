@@ -77,12 +77,12 @@ app.get("/invokeanky", async (req, res) => {
     console.log('inside the invoke anky get route')
     return res.status(200).json({
       "name": "Invoke Anky",
-    "icon": "infinity",
-    "description": "Have @anky reply to this cast.",
-    "action": {
-        "type": "post",
-        "postUrl": `https://snarkyanky.lat/invokeanky`
-    }
+      "icon": "infinity",
+      "description": "Have @anky reply to this cast.",
+      "action": {
+          "type": "post",
+          "postUrl": `https://snarkyanky.lat/invokeanky`
+      }
     })
   } catch (error) {
     console.log("there was an error retrieving the invoke anky action")
@@ -92,7 +92,6 @@ app.get("/invokeanky", async (req, res) => {
 app.post("/invokeanky", async (req,res) => {
   try {
     const fullUrl = req.protocol + "://" + req.get("host");
-
     console.log("time to invoke anky on this cast: ", req.body);
     const replyStatus = await replyToThisCast(req.body.untrustedData.castId.hash, fullUrl);
     console.log("the reply status is: ", replyStatus)
