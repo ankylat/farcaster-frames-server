@@ -74,14 +74,14 @@ app.post("/finish-session", async (req, res) => {
 
 app.get("/invokeanky", async (req, res) => {
   try {
-    const fullUrl = req.protocol + "://" + req.get("host");
+    console.log('inside the invoke anky get route')
     return res.status(200).json({
       "name": "Invoke Anky",
     "icon": "infinity",
     "description": "Have @anky reply to this cast.",
     "action": {
         "type": "post",
-        "postUrl": `${fullUrl}/invokeanky`
+        "postUrl": `https://snarkyanky.lat/invokeanky`
     }
     })
   } catch (error) {
