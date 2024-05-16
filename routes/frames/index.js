@@ -102,7 +102,7 @@ router.get("/image", async (req, res) => {
   router.post("/cast", async (req, res) => {
     try {
       const fullUrl = req.protocol + "://" + req.get("host");
-      const fullAddUrl = `https://warpcast.com/~/add-cast-action?url=${encodeURIComponent("https://snarkyanky.lat/invokeanky")}`;
+      const fullAddUrl = `https://warpcast.com/~/add-cast-action?url=${encodeURIComponent(`${process.env.SERVER_API_ROUTE}/invokeanky`)}`;
 
       console.log('the full add url is: ', fullAddUrl)
       res.setHeader("Content-Type", "text/html");

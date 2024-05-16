@@ -74,7 +74,6 @@ app.post("/finish-session", async (req, res) => {
 
 app.get("/invokeanky", async (req, res) => {
   try {
-    console.log('inside the invoke anky get route')
     return res.status(200).json({
       "name": "Invoke Anky",
       "icon": "infinity",
@@ -92,16 +91,14 @@ app.get("/invokeanky", async (req, res) => {
 app.post("/invokeanky", async (req,res) => {
   try {
     const fullUrl = req.protocol + "://" + req.get("host");
-    console.log("time to invoke anky on this cast: ", req.body);
     const replyStatus = await replyToThisCast(req.body.untrustedData.castId.hash, fullUrl);
-    console.log("the reply status is: ", replyStatus)
     res.status(200).json({
       "type": "message",
       "message": "your wishes are my replies",
     })
   } catch (error) {
     console.log("there was an error invoking anky");
-    res.status(500).json({message: "error invoking anky"})
+    res.status(404).json({message: "error invoking anky"})
   }
 })
 
