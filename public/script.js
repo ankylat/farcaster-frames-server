@@ -10,7 +10,7 @@ let intervalId;
 let castId;
 let userWriting;
 const secondsOfLife = 8;
-const apiRoute = 'https://snarkyanky.lat'; // Update with your actual API route
+const apiRoute = 'https://snarkyanky.lat'; 
 
 const handleTextChange = () => {
   lastKeystroke = Date.now();
@@ -28,6 +28,10 @@ const finishWritingSession = async (retryCount = 0) => {
       resetSession();
       return textarea.classList.remove('timeover');
     }
+
+    setTimeout(() => {
+        textarea.classList.add('hidden');
+    }, 1000);
   
     try {
       const response = await fetch(`${apiRoute}/finish-session`, {
