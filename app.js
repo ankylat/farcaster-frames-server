@@ -19,10 +19,12 @@ const port = 3003;
 app.use("/farhack", farhackRoute);
 app.use("/frames", framesRoute);
 
+app.use(express.static('public'));
+
 // ********* ROUTES ***********
 
 app.get("/", (req, res) => {
-  res.send("hello to the farcaster frames server");
+  res.sendFile(__dirname + '/public/index.html');
 });
 
 app.post("/cast-anon", (req, res) => {
@@ -31,7 +33,7 @@ app.post("/cast-anon", (req, res) => {
 
 app.delete("/delete-cast", async (req, res) => {
   try {
-    const castHash = req.query.castId;
+    const castHash = req.body.castId;
 
     const options = {
       method: "DELETE",
