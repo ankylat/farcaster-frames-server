@@ -488,7 +488,28 @@ router.post("/bot", async (req, res) => {
   try {
     let botResponse;
     const fullUrl = req.protocol + "://" + req.get("host");
+    const fullAddUrl = `https://warpcast.com/~/add-cast-action?url=${encodeURIComponent(`${process.env.SERVER_API_ROUTE}/invokeanky`)}`;
     res.setHeader("Content-Type", "text/html");
+      res.status(200).send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>anky</title>
+        <meta property="og:title" content="anky">
+        <meta property="og:image" content="${fullUrl}/frames/image?cid=${req.query.cid || ""}">
+        <meta name="fc:frame" content="vNext">
+        <meta name="fc:frame:image" content="https://github.com/jpfraneto/images/blob/main/replier.png?raw=true">
+        <meta name="fc:frame:image:aspect_ratio" content="1:1">
+        <meta name="fc:frame:button:1" content="install invoke anky">
+        <meta name="fc:frame:button:1:action" content="link" />
+        <meta name="fc:frame:button:1:target" content="${
+            fullAddUrl
+          }" />
+      </head>
+      </html>
+      `);
+
+
     const stepOfImage = Number(req.query.stepOfImage) || 1;
     if (stepOfImage == 4) {
       const remainingReplies = await talkToBot(
