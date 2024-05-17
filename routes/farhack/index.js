@@ -489,8 +489,8 @@ router.post("/bot", async (req, res) => {
     let botResponse;
     const fullUrl = req.protocol + "://" + req.get("host");
     const fullAddUrl = `https://warpcast.com/~/add-cast-action?url=${encodeURIComponent(`${process.env.SERVER_API_ROUTE}/invokeanky`)}`;
-    return res.setHeader("Content-Type", "text/html");
-      res.status(200).send(`
+    res.setHeader("Content-Type", "text/html");
+     return  res.status(200).send(`
       <!DOCTYPE html>
       <html>
       <head>
