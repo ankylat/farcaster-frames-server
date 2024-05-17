@@ -8,9 +8,20 @@ let lastKeystroke;
 let lifeBarLength = 100;
 let intervalId;
 let castId;
+let sessionId;
 let userWriting;
 const secondsOfLife = 8;
 const apiRoute = 'https://farcaster-frames-server-2.onrender.com'; 
+let requestInProgress = false;
+
+// Alternative if `crypto.randomUUID` is not supported:
+const generateSessionIdAlternative = () => {
+return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+});
+};
 
 const handleTextChange = () => {
   lastKeystroke = Date.now();
@@ -19,6 +30,7 @@ const handleTextChange = () => {
 };
 
 const finishWritingSession = async (retryCount = 0) => {
+    if (requestInProgress) return; 
     sessionStarted = false;
     isTimeOver = true;
     userWriting = textarea.value;
@@ -32,12 +44,14 @@ const finishWritingSession = async (retryCount = 0) => {
     setTimeout(() => {
         textarea.classList.add('hidden');
     }, 1000);
+
+    requestInProgress = true;
   
     try {
       const response = await fetch(`${apiRoute}/finish-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: userWriting })
+        body: JSON.stringify({ text: userWriting, sessionId })
       });
   
       if (!response.ok) {
@@ -80,7 +94,7 @@ const resetSession = () => {
   lifeBarLength = 100;
   document.querySelector('.life-bar').style.width = `${lifeBarLength}%`;
   lastKeystroke = Date.now();
-
+  sessionId = generateSessionId();
   sessionStarted = true;
   intervalId = setInterval(() => {
     const elapsedTime = Date.now() - lastKeystroke;
