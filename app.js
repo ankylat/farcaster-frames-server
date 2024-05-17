@@ -4,7 +4,7 @@ const express = require("express");
 const axios = require("axios");
 const bodyParser = require("body-parser");
 
-const { replyToThisCast, castAnonymouslyWithFrame } = require("./lib/anky")
+const { replyToThisCast, castAnonymouslyWithFrame, getAnkyImage, processThisTextThroughAnky } = require("./lib/anky")
 const { uploadSessionToIrys } = require("./lib/irys")
 
 const farhackRoute = require("./routes/farhack");
@@ -73,7 +73,9 @@ app.post("/finish-session", async (req, res) => {
     const fullUrl = req.protocol + "://" + req.get("host");
 
     processedSessions.add(sessionId);
+    const responseFromAnkyTheLlm = await processThisTextThroughAnky(text);
     const irysReceiptHash = await uploadSessionToIrys(text);
+    const getAnkyImage = await getAnkyImage(responseFromAnkyTheLlm.prompt);
     const responseFromCasting = await castAnonymouslyWithFrame(text, irysReceiptHash, fullUrl);
     res.status(200).json({...responseFromCasting, message: 'your text was casted through anky'});
   } catch (error) {
@@ -101,6 +103,7 @@ app.post("/invokeanky", async (req,res) => {
   try {
     const fullUrl = req.protocol + "://" + req.get("host");
     const replyStatus = await replyToThisCast(req.body.untrustedData.castId.hash, fullUrl);
+    console.log('the reply status is: ', replyStatus)
     res.status(200).json({
       "type": "message",
       "message": "your wishes are my replies",
