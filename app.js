@@ -68,15 +68,13 @@ app.post("/finish-session", async (req, res) => {
   if (processedSessions.has(sessionId)) {
     return res.status(409).json({ success: false, message: "Session already processed" });
   }
-  
+
   try {
     const fullUrl = req.protocol + "://" + req.get("host");
 
     processedSessions.add(sessionId);
-    console.log("inside the finish session route")
-    const irysReceiptHash = await uploadSessionToIrys(req.body.text);
-    const responseFromCasting = await castAnonymouslyWithFrame(req.body.text, irysReceiptHash, fullUrl);
-    console.log("the response from casting is", responseFromCasting);
+    const irysReceiptHash = await uploadSessionToIrys(text);
+    const responseFromCasting = await castAnonymouslyWithFrame(text, irysReceiptHash, fullUrl);
     res.status(200).json({...responseFromCasting, message: 'your text was casted through anky'});
   } catch (error) {
     res.status(500).json({success: false, message: "there was an error saving the writing session on irys"})
