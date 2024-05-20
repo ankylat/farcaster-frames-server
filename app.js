@@ -16,7 +16,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
-const port = 3003;
+const port = process.env.PORT || 3003;
 
 app.use("/farhack", farhackRoute);
 app.use("/frames", framesRoute);
