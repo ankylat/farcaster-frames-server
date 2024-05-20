@@ -3,9 +3,11 @@ const cors = require("cors");
 const express = require("express");
 const axios = require("axios");
 const bodyParser = require("body-parser");
+const cron = require("node-cron");
 
 const { replyToThisCast, castAnonymouslyWithFrame, getAnkyImage, processThisTextThroughAnky } = require("./lib/anky")
 const { uploadSessionToIrys } = require("./lib/irys");
+const { getCastFromUserToReply } = require("./lib/neynar");
 
 const farhackRoute = require("./routes/farhack");
 const framesRoute = require("./routes/frames");
@@ -20,6 +22,21 @@ app.use("/farhack", farhackRoute);
 app.use("/frames", framesRoute);
 
 app.use(express.static('public'));
+
+// ********* CRON JOBS ***********
+
+
+cron.schedule("*/15 * * * *", async () => {
+  try {
+    const randomFid = Math.floor(350000 * Math.random());
+    const castToReply = await getCastFromUserToReply(randomFid);
+    await replyToRandomCast(castToReply.hash);
+    console.log(`Completed the replyToRandomCast function, with cast hash being ${castToReply.hash}`);
+  } catch (error) {
+    console.error("Error running the replyToRandomCast function:", error);
+  }
+});
+
 
 // ********* ROUTES ***********
 
