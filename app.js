@@ -5,7 +5,7 @@ const axios = require("axios");
 const bodyParser = require("body-parser");
 
 const { replyToThisCast, castAnonymouslyWithFrame, getAnkyImage, processThisTextThroughAnky } = require("./lib/anky")
-const { uploadSessionToIrys } = require("./lib/irys")
+const { uploadSessionToIrys } = require("./lib/irys");
 
 const farhackRoute = require("./routes/farhack");
 const framesRoute = require("./routes/frames");
