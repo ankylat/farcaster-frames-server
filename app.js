@@ -30,7 +30,7 @@ cron.schedule("*/15 * * * *", async () => {
   try {
     const randomFid = Math.floor(350000 * Math.random());
     const castToReply = await getCastFromUserToReply(randomFid);
-    await replyToRandomCast(castToReply.hash);
+    await replyToThisCast(castToReply.hash);
     console.log(`Completed the replyToRandomCast function, with cast hash being ${castToReply.hash}`);
   } catch (error) {
     console.error("Error running the replyToRandomCast function:", error);
