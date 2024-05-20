@@ -73,9 +73,9 @@ app.post("/finish-session", async (req, res) => {
     const fullUrl = req.protocol + "://" + req.get("host");
 
     processedSessions.add(sessionId);
-    const responseFromAnkyTheLlm = await processThisTextThroughAnky(text);
+    // const responseFromAnkyTheLlm = await processThisTextThroughAnky(text);
     const irysReceiptHash = await uploadSessionToIrys(text);
-    const getAnkyImage = await getAnkyImage(responseFromAnkyTheLlm.prompt);
+    // const getAnkyImage = await getAnkyImage(responseFromAnkyTheLlm.prompt);
     const responseFromCasting = await castAnonymouslyWithFrame(text, irysReceiptHash, fullUrl);
     res.status(200).json({...responseFromCasting, message: 'your text was casted through anky'});
   } catch (error) {
