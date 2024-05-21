@@ -28,8 +28,12 @@ app.use(express.static('public'));
 
 cron.schedule("*/15 * * * *", async () => {
   try {
+    let castToReply = undefined;
     const randomFid = Math.floor(350000 * Math.random());
-    const castToReply = await getCastFromUserToReply(randomFid);
+    while(!castToReply){
+      console.log("inside the cast to reply thing", castToReply);
+      castToReply = await getCastFromUserToReply(randomFid);
+    }
     await replyToThisCast(castToReply.hash);
     console.log(`Completed the replyToRandomCast function, with cast hash being ${castToReply.hash}`);
   } catch (error) {
