@@ -12,21 +12,22 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <div class="carousel">
+    <img src="" class="carousel-image" id="carouselImage" />
+  </div>
   <div class="container">
     <div class="header">anky</div>
-    <div class="bars">
-      <div class="newen-bar"></div>
-      <div class="life-bar"></div>
-    </div>
     <div class="content">
       <textarea id="textarea" placeholder="just write. we will do the rest."></textarea>
       <div id="result" class="hidden">
         <h2>your thoughts were casted</h2>
+        <div id="mentorInfo" class="hidden"></div>
         <div class="buttons-container">
           <button id="view-cast" class="btn btn-warpcast">view on warpcast</button>
           <button id="delete-cast" class="btn delete">delete forever</button>
         </div>
-     
+        <p id="readmore">read more...</p>
+        <div id="mentorDescription" class="hidden"></div>
       </div>
     </div>
   </div>

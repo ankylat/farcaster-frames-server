@@ -88,7 +88,7 @@ router.get("/image", async (req, res) => {
         <meta property="og:image" content="https://github.com/jpfraneto/images/blob/main/shhhe.png?raw=true">
         <meta name="fc:frame" content="vNext">
         <meta name="fc:frame:image" content="https://github.com/jpfraneto/images/blob/main/shhhe.png?raw=true">
-        <meta name="fc:frame:post_url" content="${fullUrl}/frames/cast?cid=${req.query.cid || ""}">
+        <meta name="fc:frame:post_url" content="${fullUrl}/frames/cast?cid=${req.query.cid || ""}&imageId=${req.query.imageId || ""}">
         <meta name="fc:frame:button:1" content="read on...">
       </head>
       </html>

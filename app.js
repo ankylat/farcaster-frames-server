@@ -1,6 +1,7 @@
 require("dotenv").config();
 const cors = require("cors");
 const express = require("express");
+const path = require('path');
 const axios = require("axios");
 const bodyParser = require("body-parser");
 const cron = require("node-cron");
@@ -9,7 +10,6 @@ const { replyToThisCast, castAnonymouslyWithFrame, getAnkyImage, processThisText
 const { uploadSessionToIrys } = require("./lib/irys");
 const { getCastFromUserToReply } = require("./lib/neynar");
 
-const farhackRoute = require("./routes/farhack");
 const framesRoute = require("./routes/frames");
 
 const app = express();
@@ -18,39 +18,30 @@ app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 const port = process.env.PORT || 3003;
 
-app.use("/farhack", farhackRoute);
 app.use("/frames", framesRoute);
 
+app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use(express.static('public'));
-
-// ********* CRON JOBS ***********
-
-
-cron.schedule("*/15 * * * *", async () => {
-  try {
-    let castToReply;
-    const randomFid = Math.floor(350000 * Math.random());
-
-    // Initially fetch the castToReply
-    castToReply = await getCastFromUserToReply(randomFid);
-
-    // Only enter the while loop if castToReply is not undefined
-    while(!castToReply){
-      console.log("inside the cast to reply thing", castToReply);
-      castToReply = await getCastFromUserToReply(randomFid);
-    }
-
-    await replyToThisCast(castToReply.hash);
-    console.log(`Completed the replyToRandomCast function, with cast hash being ${castToReply.hash}`);
-  } catch (error) {
-    console.error("Error running the replyToRandomCast function:", error);
-  }
-});
 
 // ********* ROUTES ***********
 
 app.get("/", (req, res) => {
   res.sendFile(__dirname + '/public/index.html');
+});
+
+app.get("/llm", async (req, res) => {
+  const response = await axios.post(
+  "http://localhost:11434/api/chat", {
+    model: process.env.LLM_MODEL,
+    messages: [
+      {
+        role: "user",
+        content: "why is the sky blue?"
+      }
+    ],
+    stream: false
+  })
+  return res.status(200).json({123:354})
 });
 
 app.post("/cast-anon", (req, res) => {
@@ -99,10 +90,17 @@ app.post("/finish-session", async (req, res) => {
     const fullUrl = req.protocol + "://" + req.get("host");
 
     processedSessions.add(sessionId);
-    // const responseFromAnkyTheLlm = await processThisTextThroughAnky(text);
+/*     console.log("INSIDE THE FINISH SESSION ROUTE");
+    const responseFromAnkyTheLlm = await processThisTextThroughAnky(text);
+    const jsonResponse = JSON.parse(responseFromAnkyTheLlm);
+    console.log("the response from anky the llm is: ", jsonResponse) */
     const irysReceiptHash = await uploadSessionToIrys(text);
-    // const getAnkyImage = await getAnkyImage(responseFromAnkyTheLlm.prompt);
-    const responseFromCasting = await castAnonymouslyWithFrame(text, irysReceiptHash, fullUrl);
+    console.log("the irys receipt hash is: ", irysReceiptHash)
+    let ankyImageId;
+/*     const ankyImageId = await getAnkyImage(jsonResponse.imagePrompt);
+    console.log("the get anky image id is", ankyImageId) */
+    const responseFromCasting = await castAnonymouslyWithFrame(text, irysReceiptHash, fullUrl, ankyImageId?.imagineApiId);
+    console.log("the response from casting is:", responseFromCasting)
     res.status(200).json({...responseFromCasting, message: 'your text was casted through anky'});
   } catch (error) {
     res.status(500).json({success: false, message: "there was an error saving the writing session on irys"})
@@ -117,7 +115,7 @@ app.get("/invokeanky", async (req, res) => {
       "description": "Have @anky reply to this cast.",
       "action": {
           "type": "post",
-          "postUrl": `${process.env.SERVER_API_ROUTE}/invokeanky`
+          "postUrl": `https://anky.bot/invokeanky`
       }
     })
   } catch (error) {
@@ -128,6 +126,7 @@ app.get("/invokeanky", async (req, res) => {
 app.post("/invokeanky", async (req,res) => {
   try {
     const fullUrl = req.protocol + "://" + req.get("host");
+    console.log("time to invoke anky");
     const replyStatus = await replyToThisCast(req.body.untrustedData.castId.hash, fullUrl);
     console.log('the reply status is: ', replyStatus)
     res.status(200).json({
