@@ -2,7 +2,6 @@ const textarea = document.getElementById('textarea');
 const resultDiv = document.getElementById('result');
 const viewCastBtn = document.getElementById('view-cast');
 const deleteCastBtn = document.getElementById('delete-cast');
-const learnMoreBtn = document.getElementById('readmore');
 const carouselImage = document.getElementById('carouselImage');
 const mentorInfo = document.getElementById('mentorInfo');
 const mentorDescription = document.getElementById('mentorDescription');
@@ -27,6 +26,8 @@ const generateSessionId = () => {
     return v.toString(16);
   });
 };
+
+sessionId = generateSessionId();
 
 const getRandomMentorId = () => {
   return Math.floor(Math.random() * mentorCount) + 1;
@@ -212,13 +213,6 @@ deleteCastBtn.addEventListener('click', async () => {
     deleteCastBtn.classList.remove('deleting-animation');
     alert('Error deleting the cast. Please try again.');
   }
-});
-
-learnMoreBtn.addEventListener('click', () => {
-  if (mentorData && mentorData.description) {
-    mentorDescription.classList.remove('hidden');
-    streamText(mentorData.description, mentorDescription);
-    learnMoreBtn.style.visibility = 'hidden';  }
 });
 
 const streamText = (text, element) => {
